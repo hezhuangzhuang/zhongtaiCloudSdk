@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rl_content"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    tools:background="@color/color_999">
+
+    <ImageView
+        android:id="@+id/iv_hangup_site"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="6dp"
+        android:layout_centerVertical="true"
+        android:padding="10dp"
+        android:src="@mipmap/ic_control_hangup" />
+
+    <ImageView
+        android:id="@+id/iv_louder_site"
+        android:layout_width="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="6dp"
+        android:layout_toLeftOf="@+id/iv_hangup_site"
+        android:padding="10dp"
+        android:src="@mipmap/ic_control_louder_true" />
+
+    <ImageView
+        android:id="@+id/iv_broadcast_site"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="6dp"
+        android:layout_toLeftOf="@id/iv_louder_site"
+        android:padding="10dp"
+        android:src="@mipmap/ic_control_broadcast_false" />
+
+    <ImageView
+        android:id="@+id/iv_watch_site"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="6dp"
+        android:layout_toLeftOf="@id/iv_broadcast_site"
+        android:padding="10dp"
+        android:visibility="gone"
+        android:src="@mipmap/ic_control_watch_false" />
+
+    <TextView
+        android:id="@+id/tv_site_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:padding="12dp"
+        android:layout_toLeftOf="@id/iv_watch_site"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textColor="#333"
+        tools:text="名称名称名称名称名称名名称名称名称名称名称名称名称名名称名称名称名称名称名称名称名名称名称" />
+
+    <View
+        android:id="@+id/view_split"
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_below="@id/tv_site_name"
+        android:background="@color/color_444" />
+
+</RelativeLayout>

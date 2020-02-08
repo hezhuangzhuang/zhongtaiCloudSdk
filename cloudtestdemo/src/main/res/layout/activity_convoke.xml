@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingLeft="12dp"
+    android:paddingRight="12dp"
+    tools:context=".ConvokeActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+
+            <TextView
+                android:id="@+id/tv_current_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:text="当前登录账号:"
+                android:textColor="@color/color_333" />
+
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/color_ccc"
+                android:gravity="center"
+                android:paddingTop="12dp"
+                android:layout_marginTop="20dp"
+                android:paddingBottom="12dp"
+                android:text="点对点呼叫"
+                android:textColor="@color/color_333" />
+
+            <EditText
+                android:id="@+id/et_number"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginRight="3dp"
+                android:background="@drawable/shape_bg_number"
+                android:hint="请输入号码"
+                android:maxLines="1"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:singleLine="true"
+                android:text="00991116072120"
+                android:textColor="@color/color_333"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/bt_call_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/shape_bg_call_conf"
+                android:text="呼叫号码"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:background="@color/color_ccc"
+                android:gravity="center"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:text="加入会议"
+                android:textColor="@color/color_333" />
+
+            <EditText
+                android:id="@+id/et_join_number"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginRight="3dp"
+                android:background="@drawable/shape_bg_number"
+                android:hint="请输入会议号"
+                android:maxLines="1"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:singleLine="true"
+                android:text="00991116072120"
+                android:textColor="@color/color_333"
+                android:textSize="16sp" />
+
+            <EditText
+                android:id="@+id/et_pwd"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginRight="3dp"
+                android:background="@drawable/shape_bg_number"
+                android:hint="请输入会议密码"
+                android:maxLines="1"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:singleLine="true"
+                android:text="00991116072120"
+                android:textColor="@color/color_333"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/bt_join"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/shape_bg_call_conf"
+                android:text="加入会议"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:background="@color/color_ccc"
+                android:gravity="center"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:text="会议相关"
+                android:textColor="@color/color_333" />
+
+            <EditText
+                android:id="@+id/et_conf_name"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginRight="3dp"
+                android:background="@drawable/shape_bg_number"
+                android:hint="请输入会议名称"
+                android:maxLines="1"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:singleLine="true"
+                android:textColor="@color/color_333"
+                android:textSize="16sp" />
+
+            <EditText
+                android:id="@+id/et_member_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/shape_bg_number"
+                android:hint="请输入会场号码，多个号码以逗号分隔,加号用数字00代替"
+                android:paddingLeft="12dp"
+                android:paddingTop="12dp"
+                android:paddingRight="12dp"
+                android:paddingBottom="12dp"
+                android:textColor="@color/color_333" />
+
+            <Button
+                android:id="@+id/bt_create_conf"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/shape_bg_call_conf"
+                android:text="创建会议"
+                android:textColor="@color/white" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+
+
+            <Button
+                android:id="@+id/bt_my_conf"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:layout_marginTop="20dp"
+                android:text="我的会议" />
+
+            <Button
+                android:id="@+id/bt_logout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:layout_marginTop="20dp"
+                android:text="登出" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

@@ -1,0 +1,1231 @@
+package com.hw.cloudlibrary.activity;
+
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.content.Intent;
+import android.os.Build;
+import android.os.Handler;
+import android.os.Message;
+import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.BottomSheetDialog;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.SurfaceView;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
+import android.view.WindowManager;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import com.google.gson.Gson;
+import com.huawei.ecterminalsdk.base.TsdkConfMediaType;
+import com.huawei.ecterminalsdk.base.TsdkConfRole;
+import com.huawei.opensdk.callmgr.CallConstant;
+import com.huawei.opensdk.callmgr.CallInfo;
+import com.huawei.opensdk.callmgr.CallMgr;
+import com.huawei.opensdk.callmgr.VideoMgr;
+import com.huawei.opensdk.commonservice.common.localbroadcast.CustomBroadcastConstants;
+import com.huawei.opensdk.commonservice.common.localbroadcast.LocBroadcast;
+import com.huawei.opensdk.commonservice.common.localbroadcast.LocBroadcastReceiver;
+import com.huawei.opensdk.commonservice.common.util.LogUtil;
+import com.huawei.opensdk.demoservice.ConfBaseInfo;
+import com.huawei.opensdk.demoservice.ConfConstant;
+import com.huawei.opensdk.demoservice.MeetingMgr;
+import com.huawei.opensdk.demoservice.Member;
+import com.hw.cloudlibrary.R;
+import com.hw.cloudlibrary.adapter.ConfControlItem;
+import com.hw.cloudlibrary.ecsdk.common.UIConstants;
+import com.hw.cloudlibrary.ecsdk.login.CallFunc;
+import com.hw.cloudlibrary.utils.DensityUtil;
+import com.hw.cloudlibrary.utils.StatusBarUtils;
+import com.hw.cloudlibrary.utils.ToastHelper;
+import com.hw.cloudlibrary.utils.sharedpreferences.SPStaticUtils;
+import com.hw.cloudlibrary.widget.CustomDialog;
+import com.hw.cloudlibrary.widget.DragFrameLayout;
+import com.hw.cloudlibrary.widget.dialog.OnDialogClickListener;
+import com.hw.cloudlibrary.widget.rv.BaseItemAdapter;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.huawei.ecterminalsdk.base.TsdkConfRole.TSDK_E_CONF_ROLE_CHAIRMAN;
+
+/**
+ * 点对点视频界面
+ */
+public class VideoConfActivity extends BaseLibActivity implements View.OnClickListener, LocBroadcastReceiver {
+    private static final int ADD_LOCAL_VIEW = 101;
+
+    private String[] mActions = new String[]{
+            CustomBroadcastConstants.CONF_STATE_UPDATE,
+            CustomBroadcastConstants.GET_DATA_CONF_PARAM_RESULT,
+            CustomBroadcastConstants.DATA_CONFERENCE_JOIN_RESULT,
+            CustomBroadcastConstants.ADD_LOCAL_VIEW,
+            CustomBroadcastConstants.DEL_LOCAL_VIEW,
+            CustomBroadcastConstants.DATE_CONFERENCE_START_SHARE_STATUS,
+            CustomBroadcastConstants.DATE_CONFERENCE_END_SHARE_STATUS,
+            CustomBroadcastConstants.UPGRADE_CONF_RESULT,
+            CustomBroadcastConstants.UN_MUTE_CONF_RESULT,
+            CustomBroadcastConstants.MUTE_CONF_RESULT,
+            CustomBroadcastConstants.LOCK_CONF_RESULT,
+            CustomBroadcastConstants.UN_LOCK_CONF_RESULT,
+            CustomBroadcastConstants.ADD_ATTENDEE_RESULT,
+            CustomBroadcastConstants.DEL_ATTENDEE_RESULT,
+            CustomBroadcastConstants.MUTE_ATTENDEE_RESULT,
+            CustomBroadcastConstants.UN_MUTE_ATTENDEE_RESULT,
+            CustomBroadcastConstants.HAND_UP_RESULT,
+            CustomBroadcastConstants.CANCEL_HAND_UP_RESULT,
+            CustomBroadcastConstants.SET_CONF_MODE_RESULT,
+            CustomBroadcastConstants.WATCH_ATTENDEE_CONF_RESULT,
+            CustomBroadcastConstants.BROADCAST_ATTENDEE_CONF_RESULT,
+            CustomBroadcastConstants.CANCEL_BROADCAST_CONF_RESULT,
+            CustomBroadcastConstants.REQUEST_CHAIRMAN_RESULT,
+            CustomBroadcastConstants.RELEASE_CHAIRMAN_RESULT,
+            CustomBroadcastConstants.SPEAKER_LIST_IND,
+            CustomBroadcastConstants.GET_CONF_END,
+            CustomBroadcastConstants.SCREEN_SHARE_STATE,
+            CustomBroadcastConstants.STATISTIC_LOCAL_QOS,
+            CustomBroadcastConstants.GET_SVC_WATCH_INFO};
+
+    /*会控顶部*/
+    private ImageView ivBg;
+    private RelativeLayout llTopControl;
+    private LinearLayout llBottomControl;
+    /*会控顶部-end*/
+
+    private FrameLayout mRemoteView;
+    private DragFrameLayout mLocalView;
+    private FrameLayout mHideView;
+
+    private ImageView ivRequestChair;
+    private ImageView ivAddMember;
+
+    private TextView tvHangUp;
+    private TextView tvMic;
+    private TextView tvMute;
+    private ImageView ivSwitchCamera;
+    private ImageView ivCloseCamera;
+    private ImageView ivMuteConf;
+    private TextView tvConfName;
+
+
+    private CallInfo mCallInfo;
+    private long mCallID;
+    private Object thisVideoActivity = this;
+
+    private CallMgr mCallMgr;
+    private CallFunc mCallFunc;
+    private MeetingMgr instance;
+
+    private String confID;
+
+    private boolean showControl = true;//是否显示控制栏
+
+    private Gson gson = new Gson();
+
+    //是否是主席
+    private boolean isChair = false;
+
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case ADD_LOCAL_VIEW:
+                    addSurfaceView(true);
+                    setAutoRotation(thisVideoActivity, true);
+                    break;
+
+                default:
+                    break;
+            }
+        }
+    };
+
+    @Override
+    protected void findViews() {
+        mRemoteView = (FrameLayout) findViewById(R.id.conf_share_layout);
+        mLocalView = (DragFrameLayout) findViewById(R.id.conf_video_small_logo);
+        mHideView = (FrameLayout) findViewById(R.id.hide_video_view);
+        tvHangUp = (TextView) findViewById(R.id.tv_hang_up);
+
+        llTopControl = (RelativeLayout) findViewById(R.id.ll_top_control);
+        llBottomControl = (LinearLayout) findViewById(R.id.ll_bottom_control);
+        ivBg = (ImageView) findViewById(R.id.iv_bg);
+
+        tvConfName = (TextView) findViewById(R.id.tv_conf_name);
+        tvMic = (TextView) findViewById(R.id.tv_mic);
+        tvMute = (TextView) findViewById(R.id.tv_mute);
+        ivSwitchCamera = (ImageView) findViewById(R.id.iv_switch_camera);
+        ivCloseCamera = (ImageView) findViewById(R.id.iv_close_camera);
+
+        ivMuteConf = (ImageView) findViewById(R.id.iv_mute_conf);
+        ivMuteConf.setVisibility(View.VISIBLE);
+
+        ivRequestChair = (ImageView) findViewById(R.id.iv_request_chair);
+        ivAddMember = (ImageView) findViewById(R.id.iv_add_member);
+    }
+
+    @Override
+    protected void initData() {
+        if (Build.VERSION.SDK_INT < 28) {
+            StatusBarUtils.setTransparent(this);
+        } else {
+            StatusBarUtils.setTranslucentForImageView(this);
+        }
+
+        // 保持屏幕常亮
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        Intent intent = getIntent();
+
+        confID = intent.getStringExtra(UIConstants.CONF_ID);
+
+        mCallInfo = gson.fromJson(SPStaticUtils.getString(UIConstants.CALL_INFO), CallInfo.class);
+
+        mCallID = mCallInfo.getCallID();
+
+        mCallMgr = CallMgr.getInstance();
+        mCallFunc = CallFunc.getInstance();
+        instance = MeetingMgr.getInstance();
+
+        //设置为扬声器模式
+        setLoudSpeaker();
+
+        ivRequestChair.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    protected void setListener() {
+        ivBg.setOnClickListener(this);
+        tvHangUp.setOnClickListener(this);
+
+        tvMic.setOnClickListener(this);
+        tvMute.setOnClickListener(this);
+        ivSwitchCamera.setOnClickListener(this);
+        ivCloseCamera.setOnClickListener(this);
+
+        ivRequestChair.setOnClickListener(this);
+        ivAddMember.setOnClickListener(this);
+        ivMuteConf.setOnClickListener(this);
+    }
+
+    @Override
+    protected int getLayoutId() {
+        return R.layout.activity_video;
+    }
+
+    private void addSurfaceView(boolean onlyLocal) {
+        if (!onlyLocal) {
+            addSurfaceView(mRemoteView, getRemoteVideoView());
+        }
+        addSurfaceView(mLocalView, getLocalVideoView());
+        addSurfaceView(mHideView, getHideVideoView());
+    }
+
+    private void addSurfaceView(ViewGroup container, SurfaceView child) {
+        if (child == null) {
+            return;
+        }
+        if (child.getParent() != null) {
+            ViewGroup vGroup = (ViewGroup) child.getParent();
+            vGroup.removeAllViews();
+        }
+        container.addView(child);
+    }
+
+    public SurfaceView getHideVideoView() {
+        return VideoMgr.getInstance().getLocalHideView();
+    }
+
+    public SurfaceView getLocalVideoView() {
+        return VideoMgr.getInstance().getLocalVideoView();
+    }
+
+    public SurfaceView getRemoteVideoView() {
+//        return VideoMgr.getInstance().getRemoteVideoView();
+        return VideoMgr.getInstance().getRemoteBigVideoView();
+    }
+
+    public void setAutoRotation(Object object, boolean isOpen) {
+        VideoMgr.getInstance().setAutoRotation(object, isOpen, 1);
+    }
+
+    /**
+     * 设置为扬声器
+     */
+    public void setLoudSpeaker() {
+        //获取扬声器状态
+        //如果不是扬声器则切换成扬声器
+        if ((CallConstant.TYPE_LOUD_SPEAKER != CallMgr.getInstance().getCurrentAudioRoute())) {
+            CallMgr.getInstance().switchAudioRoute();
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (R.id.tv_hang_up == v.getId()) {
+            if (isChairMan()) {
+                //结束会议
+                showEndConfDialog();
+            } else {
+                //离开会议
+                showLeaveConfDialog();
+            }
+        } else if (R.id.iv_bg == v.getId()) {
+            if (showControl) {
+                hideControl();
+            } else {
+                showControl();
+            }
+        }//麦克风
+        else if (R.id.tv_mic == v.getId()) {
+            muteMicCall();
+        }//扬声器
+        else if (R.id.tv_mute == v.getId()) {
+            final int audioRoute = CallMgr.getInstance().switchAudioRoute();
+            tvMute.setCompoundDrawablesWithIntrinsicBounds(0, audioRoute == CallConstant.TYPE_LOUD_SPEAKER ? R.mipmap.icon_unmute : R.mipmap.icon_mute, 0, 0);
+        }//切换摄像头
+        else if (R.id.iv_switch_camera == v.getId()) {
+            if (isLocalCameraClose) {
+                return;
+            }
+            switchCamera();
+        }//关闭本地摄像头
+        else if (R.id.iv_close_camera == v.getId()) {
+            switchCameraStatus();
+        }//申请主席
+        else if (R.id.iv_request_chair == v.getId()) {
+            if (isChairMan()) {
+                showReleaseChairDialog();
+            } else {
+                showRequestChairDialog();
+            }
+        }//添加成员
+        else if (R.id.iv_add_member == v.getId()) {
+            //显示会控列表
+            showConfControlDialog(getMemberList());
+        }//静音会议
+        else if (R.id.iv_mute_conf == v.getId()) {
+            //静音会议
+            MeetingMgr.getInstance().muteConf(!getCurrentConfBaseInfo().isMuteAll());
+        }
+    }
+
+    /**
+     * 申请主席的对话框
+     */
+    private CustomDialog requestChairDialog;
+
+    /**
+     * 申请主席
+     */
+    private void showRequestChairDialog() {
+        if (null == requestChairDialog) {
+            requestChairDialog = new CustomDialog(this);
+            requestChairDialog.setDialogClickListener(new OnDialogClickListener() {
+                @Override
+                public void onConfirmClickListener(String content) {
+                    requestChairman(content);
+                }
+
+                @Override
+                public void onConfirmClickListener() {
+
+                }
+
+                @Override
+                public void onCancleClickListener() {
+
+                }
+            });
+        }
+        requestChairDialog.show();
+    }
+
+
+    /**
+     * 结束会议的对话框
+     */
+    private CustomDialog endConfDialog;
+
+    /**
+     * 结束会议
+     */
+    private void showEndConfDialog() {
+        if (null == endConfDialog) {
+            endConfDialog = new CustomDialog(this, 2);
+            endConfDialog.setDialogClickListener(new OnDialogClickListener() {
+                @Override
+                public void onConfirmClickListener(String content) {
+                }
+
+                @Override
+                public void onConfirmClickListener() {
+                    endConf();
+                }
+
+                @Override
+                public void onCancleClickListener() {
+                    leaveConf();
+                }
+            });
+        }
+        endConfDialog.show();
+    }
+
+    /**
+     * 离开会议的对话框
+     */
+    private CustomDialog leaveConfDialog;
+
+    /**
+     * 离开会议
+     */
+    private void showLeaveConfDialog() {
+        if (null == leaveConfDialog) {
+            leaveConfDialog = new CustomDialog(this, 3);
+            leaveConfDialog.setDialogClickListener(new OnDialogClickListener() {
+                @Override
+                public void onConfirmClickListener(String content) {
+                }
+
+                @Override
+                public void onConfirmClickListener() {
+                    leaveConf();
+                }
+
+                @Override
+                public void onCancleClickListener() {
+
+                }
+            });
+        }
+        leaveConfDialog.show();
+    }
+
+
+    /**
+     * 释放主席的对话框
+     */
+    private CustomDialog releaseChairDialog;
+
+    /**
+     * 释放主席
+     */
+    private void showReleaseChairDialog() {
+        if (null == releaseChairDialog) {
+            releaseChairDialog = new CustomDialog(this, 1);
+            releaseChairDialog.setDialogClickListener(new OnDialogClickListener() {
+                @Override
+                public void onConfirmClickListener(String content) {
+
+                }
+
+                @Override
+                public void onConfirmClickListener() {
+                    releaseChairman();
+                }
+
+                @Override
+                public void onCancleClickListener() {
+
+                }
+            });
+        }
+        releaseChairDialog.show();
+    }
+
+    /**
+     * 离开会议
+     */
+    private void leaveConf() {
+        int result = MeetingMgr.getInstance().leaveConf();
+        if (result != 0) {
+            return;
+        }
+
+        LocBroadcast.getInstance().unRegisterBroadcast(this, mActions);
+        finish();
+    }
+
+    /**
+     * 结束会议
+     */
+    public void endConf() {
+        int result = MeetingMgr.getInstance().endConf();
+        if (result != 0) {
+            return;
+        }
+        LocBroadcast.getInstance().unRegisterBroadcast(this, mActions);
+        finish();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        LocBroadcast.getInstance().registerBroadcast(this, mActions);
+
+        // 刷新当前扬声器状态
+//        updateLoudSpeakerButton(CallMgr.getInstance().getCurrentAudioRoute());
+
+        addSurfaceView(false);
+
+        setAutoRotation(this, true);
+
+//        ConfBaseInfo currentConfBaseInfo = getCurrentConfBaseInfo();
+//        refreshConfStatus(currentConfBaseInfo);
+    }
+
+    @Override
+    public void onBackPressed() {
+//        super.onBackPressed();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        LocBroadcast.getInstance().unRegisterBroadcast(this, mActions);
+
+        mHandler.removeCallbacksAndMessages(null);
+
+        setAutoRotation(this, false);
+
+        //是否自动接听
+        SPStaticUtils.put(UIConstants.IS_AUTO_ANSWER, false);
+    }
+
+
+    @Override
+    public void onReceive(String broadcastName, Object obj) {
+        final int result;
+        LogUtil.d("VideoConfActivity", broadcastName + "-->" + obj);
+        switch (broadcastName) {
+            case CustomBroadcastConstants.CONF_STATE_UPDATE:
+                String conferenceID = (String) obj;
+                if (!conferenceID.equals(confID)) {
+                    return;
+                }
+
+                //判断会议状态，如果会议结束，则关闭会议界面
+                ConfBaseInfo confBaseInfo = getCurrentConfBaseInfo();
+
+
+                if (null == confBaseInfo) {
+                    return;
+                }
+
+                //获取与会者列表
+                List<Member> memberList = getMemberList();
+
+                if (memberList == null) {
+                    return;
+                }
+
+                //刷新会议状态
+                refreshConfStatus(confBaseInfo);
+
+                //刷新列表
+                refreshMemberList(memberList);
+
+                for (final Member member : memberList) {
+                    LogUtil.d("CONF_STATE_UPDATE", member.toString());
+                    if (member.isSelf()) {
+                        postRunOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                //设置麦克风状态
+                                setMicStatus(member.isMute());
+                            }
+                        });
+                    }
+                }
+                break;
+
+            case CustomBroadcastConstants.GET_CONF_END:
+                postRunOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        videoDestroy();
+                        finish();
+                    }
+                });
+                break;
+
+            case CustomBroadcastConstants.ADD_LOCAL_VIEW:
+                mHandler.sendEmptyMessage(ADD_LOCAL_VIEW);
+                break;
+
+            case CustomBroadcastConstants.DEL_LOCAL_VIEW:
+                break;
+
+            case CustomBroadcastConstants.CONF_CALL_CONNECTED:
+                postRunOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        finish();
+                    }
+                });
+                break;
+
+            case CustomBroadcastConstants.ACTION_CALL_END_FAILED:
+                postRunOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        finish();
+                    }
+                });
+                break;
+
+            // 静音会议结果
+            case CustomBroadcastConstants.MUTE_CONF_RESULT:
+                result = (int) obj;
+                if (result != 0) {
+                    showToast("静音会议失败");
+                } else {
+                    showToast("静音会议成功");
+                }
+
+                break;
+
+            // 取消静音会议结果
+            case CustomBroadcastConstants.UN_MUTE_CONF_RESULT:
+                result = (int) obj;
+                if (result != 0) {
+                    showToast("取消静音会议失败");
+                } else {
+                    showToast("取消静音会议成功");
+                }
+
+                break;
+
+            // 邀请与会者结果
+            case CustomBroadcastConstants.ADD_ATTENDEE_RESULT:
+                result = (int) obj;
+                LogUtil.i(UIConstants.DEMO_TAG, "add attendee result: " + result);
+                if (result != 0) {
+                    showToast("邀请与会者失败");
+                    return;
+                }
+                break;
+
+            // 删除与会者结果
+            case CustomBroadcastConstants.DEL_ATTENDEE_RESULT:
+                result = (int) obj;
+                LogUtil.i(UIConstants.DEMO_TAG, "add attendee result: " + result);
+                if (result != 0) {
+                    showToast("删除与会者失败");
+                    return;
+                }
+                break;
+
+            // 静音与会者结果
+            case CustomBroadcastConstants.MUTE_ATTENDEE_RESULT:
+                result = (int) obj;
+                if (result != 0) {
+                    showToast("静音与会者失败");
+                    return;
+                }
+                break;
+
+            // 取消静音与会者结果
+            case CustomBroadcastConstants.UN_MUTE_ATTENDEE_RESULT:
+                result = (int) obj;
+                if (result != 0) {
+                    showToast("取消静音与会者失败");
+                    return;
+                }
+                break;
+
+            // 广播与会者结果
+            case CustomBroadcastConstants.BROADCAST_ATTENDEE_CONF_RESULT:
+                result = (int) obj;
+                if (result != 0) {
+                    showToast("广播与会者失败");
+                    return;
+                }
+                break;
+
+            // 取消广播与会者结果
+            case CustomBroadcastConstants.CANCEL_BROADCAST_CONF_RESULT:
+                result = (int) obj;
+                if (result != 0) {
+                    showToast("取消广播与会者失败");
+                    return;
+                }
+                break;
+
+            // 请求主席结果
+            case CustomBroadcastConstants.REQUEST_CHAIRMAN_RESULT:
+                result = (int) obj;
+                if (result != 0) {
+                    showToast("请求主席失败");
+                    return;
+                }
+                //TODO:设置主席样式
+                setSelfPresenter();
+                break;
+
+            // 释放主席结果
+            case CustomBroadcastConstants.RELEASE_CHAIRMAN_RESULT:
+                result = (int) obj;
+                if (result != 0) {
+                    showToast("释放主席失败");
+                    return;
+                }
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    /**
+     * 显示toast
+     *
+     * @param content
+     */
+    private void showToast(final String content) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ToastHelper.showShort(content);
+            }
+        });
+
+    }
+
+    /**
+     * 刷新列表
+     *
+     * @param memberList
+     */
+    private void refreshMemberList(final List<Member> memberList) {
+        postRunOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (null != confControlAdapter) {
+                    boolean b = confControlAdapter.replaceItems(memberListToMemberItemList(memberList), true);
+                }
+            }
+        });
+    }
+
+    /**
+     * 判断是否是主席
+     */
+    private void refreshConfStatus(final ConfBaseInfo currentConfBaseInfo) {
+        if (null == currentConfBaseInfo) {
+            return;
+        }
+        //是否有主席
+        postRunOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                //添加成员按钮
+                ivAddMember.setVisibility(isChairMan() ? View.VISIBLE : View.GONE);
+
+                //静音会议
+                ivMuteConf.setImageResource(currentConfBaseInfo.isMuteAll() ? R.mipmap.ic_close_all_mic : R.mipmap.ic_open_all_mic);
+
+                tvConfName.setText("会议名称:" + currentConfBaseInfo.getSubject() + "\n会议密码:" + currentConfBaseInfo.getGuestPwd());
+            }
+        });
+    }
+
+    /**
+     * 更新布局
+     *
+     * @param runnable
+     */
+    private void postRunOnUiThread(Runnable runnable) {
+        runOnUiThread(runnable);
+    }
+
+    private void setSelfPresenter() {
+        ConfBaseInfo confBaseInfo = getCurrentConfBaseInfo();
+        if (null == confBaseInfo) {
+            return;
+        }
+
+        if (confBaseInfo.getMediaType() == TsdkConfMediaType.TSDK_E_CONF_MEDIA_VIDEO
+                || confBaseInfo.getMediaType() == TsdkConfMediaType.TSDK_E_CONF_MEDIA_VOICE) {
+            return;
+        }
+
+        int result = 0;
+        Member self = MeetingMgr.getInstance().getCurrentConferenceSelf();
+        if (null == self) {
+            return;
+        }
+
+        if (self.getRole() == TsdkConfRole.TSDK_E_CONF_ROLE_CHAIRMAN && !self.isPresent()) {
+            result = MeetingMgr.getInstance().setPresenter(self);
+        }
+
+        if (0 != result) {
+//            getView().showCustomToast(R.string.set_presenter_failed);
+        }
+    }
+
+
+    public void videoDestroy() {
+        if (null != CallMgr.getInstance().getVideoDevice()) {
+            LogUtil.i(UIConstants.DEMO_TAG, "onCallClosed destroy.");
+            CallMgr.getInstance().videoDestroy();
+        }
+    }
+
+    private void showControl() {
+        llTopControl.setVisibility(View.VISIBLE);
+        getViewAlphaAnimator(llTopControl, 1).start();
+        llBottomControl.setVisibility(View.VISIBLE);
+        getViewAlphaAnimator(llBottomControl, 1).start();
+    }
+
+    private void hideControl() {
+        getViewAlphaAnimator(llBottomControl, 0).start();
+        getViewAlphaAnimator(llTopControl, 0).start();
+    }
+
+    private ViewPropertyAnimator getViewAlphaAnimator(final View view, final float alpha) {
+        ViewPropertyAnimator viewPropertyAnimator = view.animate().alpha(alpha).setDuration(300);
+        viewPropertyAnimator.setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                view.setVisibility(alpha > 0 ? View.VISIBLE : View.GONE);
+                showControl = alpha > 0 ? true : false;
+            }
+        });
+        return viewPropertyAnimator;
+    }
+
+    /**
+     * 更换麦克风状态
+     */
+    public void muteMicCall() {
+        boolean currentMuteStatus = getMicStatus();
+        if (CallMgr.getInstance().muteMic(mCallID, !currentMuteStatus)) {
+            mCallFunc.setMuteStatus(!currentMuteStatus);
+            setMicStatus(!currentMuteStatus);
+        }
+    }
+
+    /**
+     * 获取麦克风状态
+     *
+     * @return
+     */
+    public boolean getMicStatus() {
+        return mCallFunc.isMuteStatus();
+    }
+
+    /**
+     * 设置麦克风图片
+     *
+     * @param currentMuteStatus true:代表静音，false:非静音
+     */
+    private void setMicStatus(boolean currentMuteStatus) {
+        //更新状态静音按钮状态
+        tvMic.setCompoundDrawablesWithIntrinsicBounds(0, currentMuteStatus ? R.mipmap.icon_mic_close : R.mipmap.icon_mic, 0, 0);
+    }
+
+    //摄像头方向
+    private int mCameraIndex = CallConstant.FRONT_CAMERA;
+
+    /**
+     * 切换本地摄像头
+     */
+    public void switchCamera() {
+        mCameraIndex = CallConstant.FRONT_CAMERA == mCameraIndex ?
+                CallConstant.BACK_CAMERA : CallConstant.FRONT_CAMERA;
+        CallMgr.getInstance().switchCamera(mCallID, mCameraIndex);
+    }
+
+    //本地摄像头是否关闭
+    private boolean isLocalCameraClose = false;
+
+    private static final int NOT_ALPHA = 255;
+    private static final int HALF_ALPHA = 127;
+
+    /**
+     * 开关本地摄像头
+     */
+    public void switchCameraStatus() {
+        isLocalCameraClose = !isLocalCameraClose;
+        if (isLocalCameraClose) {
+            CallMgr.getInstance().closeCamera(mCallID);
+            ivCloseCamera.setImageResource(R.mipmap.icon_state_open_camera);
+            ivSwitchCamera.getDrawable().setAlpha(HALF_ALPHA);
+        } else {
+            CallMgr.getInstance().openCamera(mCallID);
+            ivCloseCamera.setImageResource(R.mipmap.icon_state_close_camera);
+            ivSwitchCamera.getDrawable().setAlpha(NOT_ALPHA);
+        }
+    }
+
+//    创建会议              --》可以
+//    呼叫/挂断终端            --》可以
+//    麦克风闭音/不闭音      --》可以
+//    扬声器静音/不静音      --》听筒和扬声器切换
+//    添加会场              --》
+//    移除会场
+//    申请主席              --》可以
+//    释放主席              --》可以
+//    广播                  --》可以
+//    取消广播
+//    辅流（移动端仅接收）
+//    延长会议
+//    结束会议
+
+    /**
+     * 添加与会者
+     *
+     * @param name
+     * @param number
+     * @param account
+     */
+    public void addMember(String name, String number, String account) {
+        Member member = new Member();
+        member.setNumber(number);
+        member.setDisplayName(name);
+        member.setAccountId(account);
+        member.setRole(TsdkConfRole.TSDK_E_CONF_ROLE_ATTENDEE);
+
+        int result = MeetingMgr.getInstance().addAttendee(member);
+        if (result != 0) {
+            showToast("添加与会者失败");
+        }
+    }
+
+    /**
+     * 移除
+     *
+     * @param member
+     */
+    public void delMember(Member member) {
+        int result = MeetingMgr.getInstance().removeAttendee(member);
+        if (result != 0) {
+            showToast("移除与会者失败");
+        }
+    }
+
+    /**
+     * 静音与会者
+     *
+     * @param member
+     * @param isMute
+     */
+    public void muteMember(Member member, boolean isMute) {
+        int result = MeetingMgr.getInstance().muteAttendee(member, isMute);
+        if (result != 0) {
+            if (isMute) {
+                showToast("静音与会者失败");
+            } else {
+                showToast("取消静音与会者失败");
+            }
+        }
+    }
+
+    /**
+     * 静音会议
+     *
+     * @param isMute
+     */
+    public void muteConf(boolean isMute) {
+        int result = MeetingMgr.getInstance().muteConf(isMute);
+        if (result != 0) {
+            if (isMute) {
+                showToast("静音会议失败");
+            } else {
+                showToast("取消会议失败");
+            }
+        }
+    }
+
+    /**
+     * 广播与会者
+     *
+     * @param member
+     * @param isBroad
+     */
+    public void broadcastAttendee(Member member, boolean isBroad) {
+        int result = MeetingMgr.getInstance().broadcastAttendee(member, isBroad);
+        if (0 != result) {
+            if (isBroad) {
+                showToast("广播与会者失败失败");
+            } else {
+                showToast("取消广播与会者失败");
+            }
+        }
+    }
+
+    /**
+     * 挂断与会者
+     *
+     * @param member
+     */
+    public void hangupAttendee(Member member) {
+        int result = MeetingMgr.getInstance().hangupAttendee(member);
+        if (0 != result) {
+            showToast("挂断与会者失败");
+        }
+    }
+
+    /**
+     * 呼叫与会者
+     *
+     * @param member
+     */
+    public void redialAttendee(Member member) {
+        int result = MeetingMgr.getInstance().redialAttendee(member);
+        if (0 != result) {
+            showToast("呼叫与会者失败");
+        }
+    }
+
+    /**
+     * 观看与会者
+     *
+     * @param member
+     */
+    public void watchAttendee(Member member) {
+        int result = MeetingMgr.getInstance().watchAttendee(member);
+        if (0 != result) {
+            showToast("观看与会者失败");
+        }
+    }
+
+    /**
+     * 判断是否是主席
+     *
+     * @return
+     */
+    public boolean isChairMan() {
+        Member self = getSelf();
+        if (self == null) {
+            return false;
+        }
+        return self.getRole() == TSDK_E_CONF_ROLE_CHAIRMAN;
+    }
+
+    /**
+     * 获取当前的会议详情
+     *
+     * @return
+     */
+    private ConfBaseInfo getCurrentConfBaseInfo() {
+        return MeetingMgr.getInstance().getCurrentConferenceBaseInfo();
+    }
+
+    /**
+     * 获取当前的member
+     *
+     * @return
+     */
+    private Member getSelf() {
+        return MeetingMgr.getInstance().getCurrentConferenceSelf();
+    }
+
+    /**
+     * 获取与会者列表
+     *
+     * @return
+     */
+    private List<Member> getMemberList() {
+        List<Member> memberList = MeetingMgr.getInstance().getCurrentConferenceMemberList();
+        if (null == memberList) {
+            return new ArrayList<>();
+        } else {
+            return memberList;
+        }
+    }
+
+    /**
+     * 申请主席
+     *
+     * @param chairmanPassword
+     */
+    public void requestChairman(String chairmanPassword) {
+        int result = MeetingMgr.getInstance().requestChairman(chairmanPassword);
+        if (result != 0) {
+            showToast("申请主席失败");
+            return;
+        }
+    }
+
+    /**
+     * 释放主席
+     */
+    public void releaseChairman() {
+        int result = MeetingMgr.getInstance().releaseChairman();
+        if (result != 0) {
+            showToast("释放主席失败");
+            return;
+        }
+    }
+
+    /***************************会控的对话框-start*************************/
+    private BottomSheetDialog confControlDialog;
+    private TextView tvControlCancel;
+    private TextView tvControlConfirm;
+
+    private RecyclerView rvControl;
+    private BaseItemAdapter<ConfControlItem> confControlAdapter;
+
+    /**
+     * 显示会控的对话框
+     */
+    private void showConfControlDialog(List<Member> siteList) {
+        if (null != confControlDialog) {
+            //刷新数据
+            confControlAdapter.replaceItems(memberListToMemberItemList(siteList), true);
+        } else {
+            initConfControlDialog(siteList);
+        }
+
+        //设置添添加人员按钮是否显示
+        tvControlConfirm.setVisibility(isChairMan() ? View.VISIBLE : View.INVISIBLE);
+
+        confControlDialog.show();
+    }
+
+    private void initConfControlDialog(List<Member> siteList) {
+        //初始化适配器
+        initConfControlAdapter(siteList);
+
+        //构造函数的第二个参数可以设置BottomSheetDialog的主题样式
+        confControlDialog = new BottomSheetDialog(this);
+        //导入底部reycler布局
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_add_site, null, false);
+
+        rvControl = view.findViewById(R.id.rv_add_attendees);
+        rvControl.setLayoutManager(new LinearLayoutManager(this));
+        rvControl.setAdapter(confControlAdapter);
+
+        tvControlCancel = view.findViewById(R.id.tv_add_cancle);
+        tvControlConfirm = view.findViewById(R.id.tv_add_confirm);
+        TextView tvLable = view.findViewById(R.id.tv_lable);
+        tvLable.setText("与会列表");
+
+        View speaceHolder = view.findViewById(R.id.view_speaceHolder);
+
+        //配置点击外部区域消失
+        speaceHolder.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                confControlDialog.dismiss();
+            }
+        });
+
+        tvControlCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                confControlDialog.dismiss();
+            }
+        });
+
+        tvControlConfirm.setText("添加用户");
+
+        tvControlConfirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //获取所有会场
+//                getAllPeople();
+            }
+        });
+
+        confControlDialog.setContentView(view);
+        try {
+            ViewGroup parent = (ViewGroup) view.getParent();
+            parent.setBackgroundColor(ContextCompat.getColor(this, R.color.tran));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        BottomSheetBehavior mBehavior = BottomSheetBehavior.from((View) view.getParent());
+        //设置默认弹出高度为屏幕的0.4倍
+        //mBehavior.setPeekHeight((int) (0.4 * height));
+        mBehavior.setPeekHeight((int) (DensityUtil.getScreenHeight(this)));
+
+        //设置点击dialog外部不消失
+        confControlDialog.setCanceledOnTouchOutside(false);
+        confControlDialog.setCancelable(false);
+    }
+
+    /**
+     * 初始化会控适配器
+     *
+     * @param siteList
+     */
+    private void initConfControlAdapter(List<Member> siteList) {
+        confControlAdapter = new BaseItemAdapter<ConfControlItem>(false);
+        confControlAdapter.setItems(memberListToMemberItemList(siteList));
+    }
+
+    /**
+     * 返回成员
+     *
+     * @param memberList
+     * @return
+     */
+    private List<ConfControlItem> memberListToMemberItemList(List<Member> memberList) {
+        List<ConfControlItem> confControlItems = new ArrayList<>();
+
+        ConfControlItem controlItem = null;
+
+        for (Member member : memberList) {
+            controlItem = new ConfControlItem(member);
+            controlItem.setOnControlItemClickListener(confControlItemClickListener);
+            confControlItems.add(controlItem);
+        }
+        return confControlItems;
+    }
+
+    /**
+     * 会控按钮
+     */
+    private ConfControlItem.onControlItemClickListener confControlItemClickListener = new ConfControlItem.onControlItemClickListener() {
+        @Override
+        public void onHangUpSite(Member member, int position) {
+            if (member.getStatus() != ConfConstant.ParticipantStatus.IN_CONF) {
+                redialAttendee(member);
+            } else {
+                hangupAttendee(member);
+            }
+        }
+
+        @Override
+        public void onCallSite(Member member, int position) {
+            if (member.getStatus() != ConfConstant.ParticipantStatus.IN_CONF) {
+                redialAttendee(member);
+            } else {
+                hangupAttendee(member);
+            }
+        }
+
+        @Override
+        public void onLoduerSite(Member member, int position) {
+        }
+
+        @Override
+        public void onBroadcastSite(Member member, int position) {
+            broadcastAttendee(member, !member.isBroadcastSelf());
+        }
+
+        @Override
+        public void onWatchSite(Member member, int position) {
+//            ToastHelper.showShort("onWatchSite" + member.getDisplayName());
+//            watchAttendee(member);
+        }
+    };
+    /***************************会控的对话框-end*************************/
+}

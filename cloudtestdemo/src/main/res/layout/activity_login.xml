@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:gravity="center"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:orientation="vertical"
+    >
+
+    <TextView
+        android:gravity="center"
+        android:text="云SDK接口"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <EditText
+        android:id="@+id/et_username"
+        android:layout_width="310dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:drawableLeft="@mipmap/ic_user"
+        android:drawablePadding="6dp"
+        android:hint="请输入用户名"
+        android:maxLength="16"
+        android:maxLines="1"
+        android:padding="12dp"
+        android:singleLine="true"
+        android:textColor="@color/color_333"
+        android:textSize="14sp"/>
+
+    <View
+        android:layout_width="310dp"
+        android:layout_height="1dp" />
+
+    <EditText
+        android:id="@+id/et_password"
+        android:layout_width="310dp"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@mipmap/ic_password"
+        android:drawablePadding="6dp"
+        android:hint="请输入密码"
+        android:inputType="text"
+        android:maxLength="16"
+        android:maxLines="1"
+        android:padding="12dp"
+        android:singleLine="true"
+        android:textColor="@color/color_333"
+        android:textSize="14sp"/>
+
+    <View
+        android:layout_width="310dp"
+        android:layout_height="1dp"
+        />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="15dp"
+        android:layout_marginTop="10dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tv_auto_login"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawablePadding="10dp"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            android:text="自动登录"
+            android:textColor="@color/color_999"
+            android:textSize="14sp"/>
+    </FrameLayout>
+
+    <Button
+        android:id="@+id/bt_login"
+        android:layout_width="310dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/shape_bt_login_bg"
+        android:text="登录"
+        android:textColor="@color/white"
+        android:textSize="15sp"/>
+</LinearLayout>

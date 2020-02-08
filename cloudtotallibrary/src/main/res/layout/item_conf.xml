@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="20dp"
+    android:background="@color/white">
+
+    <View
+        android:id="@+id/view_speaceHolder"
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        android:layout_marginBottom="20dp"
+        android:background="#f6f6f6" />
+
+    <ImageView
+        android:id="@+id/iv_conf_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/view_speaceHolder"
+        android:layout_marginLeft="14dp"
+        android:layout_marginRight="10dp"
+        android:src="@mipmap/ic_conf_status_going" />
+
+    <TextView
+        android:id="@+id/tv_join"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/view_speaceHolder"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="14dp"
+        android:drawableLeft="@mipmap/ic_join_conf"
+        android:drawablePadding="7dp"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+    <TextView
+        android:id="@+id/tv_conf_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/view_speaceHolder"
+        android:layout_marginRight="5dp"
+        android:layout_toLeftOf="@id/tv_join"
+        android:layout_toRightOf="@id/iv_conf_status"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:textColor="@color/color_333"
+        android:textSize="17sp"
+        android:textStyle="bold"
+        tools:text="技术中心年中总结报告" />
+
+    <TextView
+        android:id="@+id/tv_scheduler_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_conf_name"
+        android:layout_marginTop="5dp"
+        android:layout_toRightOf="@id/iv_conf_status"
+        android:textColor="@color/color_999"
+        android:textSize="13sp"
+        tools:text="999" />
+
+    <TextView
+        android:id="@+id/tv_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_scheduler_name"
+        android:layout_marginTop="5dp"
+        android:layout_toRightOf="@id/iv_conf_status"
+        android:drawablePadding="6dp"
+        android:textColor="@color/color_666"
+        android:textSize="13sp"
+        android:visibility="gone"
+        tools:text="999" />
+
+    <!--    <TextView-->
+    <!--        android:id="@+id/tv_attendee"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_below="@id/tv_time"-->
+    <!--        android:layout_marginTop="5dp"-->
+    <!--        android:layout_toRightOf="@id/iv_img"-->
+    <!--        android:drawableLeft="@mipmap/ic_attendee"-->
+    <!--        android:drawablePadding="6dp"-->
+    <!--        tools:text="999"-->
+    <!--        android:textColor="@color/color_666"-->
+    <!--        android:textSize="13sp" />-->
+
+
+</RelativeLayout>
