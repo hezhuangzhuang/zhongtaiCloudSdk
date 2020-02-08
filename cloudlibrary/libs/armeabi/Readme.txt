@@ -1,1 +1,0 @@
-此路径存放依赖的*.so，SDK依赖的*.so从SDK包中的"android\armeabi"文件夹中拷贝。

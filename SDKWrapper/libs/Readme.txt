@@ -1,1 +1,0 @@
-此路径存放依赖的*.jar，SDK依赖的*.jar从SDK包中的"android\jar"文件夹中拷贝。
