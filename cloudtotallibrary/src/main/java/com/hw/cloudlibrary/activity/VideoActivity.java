@@ -98,7 +98,7 @@ public class VideoActivity extends BaseLibActivity implements View.OnClickListen
 
     @Override
     protected void findViews() {
-        mRemoteView = (FrameLayout) findViewById(R.id.conf_share_layout);
+        mRemoteView = (FrameLayout) findViewById(R.id.big_remote_view);
         mLocalView = (DragFrameLayout) findViewById(R.id.conf_video_small_logo);
         mHideView = (FrameLayout) findViewById(R.id.hide_video_view);
         llTopControl = (RelativeLayout) findViewById(R.id.ll_top_control);

@@ -44,9 +44,6 @@ public abstract class BaseMediaActivity extends BaseLibActivity implements LocBr
     private static final int BLD_TRANSFER_SUCCESS = 105;
     private static final int BLD_TRANSFER_FAILED = 106;
 
-    private Timer mDismissDialogTimer;
-    private static final int CANCEL_TIME = 25000;//呼叫默认取消时间
-
     private Gson gson = new Gson();
 
     private String[] mActions = new String[]{
@@ -126,7 +123,6 @@ public abstract class BaseMediaActivity extends BaseLibActivity implements LocBr
                                 intent.addCategory(IntentConstant.DEFAULT_CATEGORY);
 
                                 SPStaticUtils.put(UIConstants.CALL_INFO, gson.toJson(callInfo));
-//                                PreferencesHelper.saveData(UIConstants.CALL_INFO, callInfo);
 
                                 intent.putExtra(UIConstants.IS_MEETING, false);
                                 ActivityUtil.startActivity(BaseMediaActivity.this, intent);
@@ -191,7 +187,9 @@ public abstract class BaseMediaActivity extends BaseLibActivity implements LocBr
 
         CallInfo callInfo = gson.fromJson(SPStaticUtils.getString(UIConstants.CALL_INFO), CallInfo.class);
 
-//        CallInfo callInfo = PreferencesHelper.getData(, CallInfo.class);
+        if (null == callInfo) {
+            return;
+        }
 
         Log.i(TAG, "120-->" + callInfo.toString());
         mCallNumber = callInfo.getPeerNumber();

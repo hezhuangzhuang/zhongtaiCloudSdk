@@ -400,7 +400,6 @@ public class VideoMgr {
         handler.post(new Runnable() {
             @Override
             public void run() {
-
                 if (isInitializedVideoWindows == false) {
                     createVideoRenderer(true);
                 } else {
@@ -464,7 +463,6 @@ public class VideoMgr {
                 tsdkCall.setSvcVideoWindow(svcWndInfoList);
             }
         });
-
     }
 
     /**

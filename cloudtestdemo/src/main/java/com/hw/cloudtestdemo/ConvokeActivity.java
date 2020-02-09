@@ -44,6 +44,7 @@ public class ConvokeActivity extends BaseLibActivity implements View.OnClickList
     private TextView tvCurrentNumber;
     private Button btMyConf;
 
+    private EditText etStartTime;
 
     public static void startActivity(Context context) {
         context.startActivity(new Intent(context, ConvokeActivity.class));
@@ -60,7 +61,10 @@ public class ConvokeActivity extends BaseLibActivity implements View.OnClickList
         tvCurrentNumber = (TextView) findViewById(R.id.tv_current_number);
 
         etJoinNumber = (EditText) findViewById(R.id.et_join_number);
+
         etPwd = (EditText) findViewById(R.id.et_pwd);
+        etStartTime = (EditText) findViewById(R.id.et_start_time);
+
         btMyConf = (Button) findViewById(R.id.bt_my_conf);
 
         btJoin = (Button) findViewById(R.id.bt_join);

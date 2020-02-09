@@ -43,14 +43,11 @@ public class CallFunc implements ICallNotification, ICtdNotification {
     private String mFilePath;
 
     private static CallFunc mInstance = new CallFunc();
-
     private String[] broadcastNames = new String[]{CustomBroadcastConstants.CONF_INCOMING_TO_CALL_INCOMING};
 
     private CallFunc() {
         LocBroadcast.getInstance().registerBroadcast(receiver, broadcastNames);
     }
-
-    private Gson gson = new Gson();
 
     private LocBroadcastReceiver receiver = new LocBroadcastReceiver() {
         @Override
@@ -83,11 +80,8 @@ public class CallFunc implements ICallNotification, ICtdNotification {
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         intent.addCategory(IntentConstant.DEFAULT_CATEGORY);
 
-                        intent.putExtra(UIConstants.CALL_INFO, callInfo);
-
-//                        PreferencesHelper.saveData(UIConstants.CALL_INFO, callInfo);
-                        SPStaticUtils.put(UIConstants.CALL_INFO, gson.toJson(callInfo));
-
+//                        intent.putExtra(UIConstants.CALL_INFO, callInfo);
+                        SPStaticUtils.put(UIConstants.CALL_INFO,gson.toJson(callInfo));
                         ActivityUtil.startActivity(LocContext.getContext(), intent);
                     }
                     break;
@@ -97,6 +91,8 @@ public class CallFunc implements ICallNotification, ICtdNotification {
             }
         }
     };
+
+    private Gson gson =new Gson();
 
     private Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -152,9 +148,8 @@ public class CallFunc implements ICallNotification, ICtdNotification {
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.addCategory(IntentConstant.DEFAULT_CATEGORY);
 
-                    intent.putExtra(UIConstants.CALL_INFO, callInfo);
-//                    PreferencesHelper.saveData(UIConstants.CALL_INFO, callInfo);
-                    SPStaticUtils.put(UIConstants.CALL_INFO, gson.toJson(callInfo));
+//                    intent.putExtra(UIConstants.CALL_INFO, callInfo);
+                    SPStaticUtils.put(UIConstants.CALL_INFO,gson.toJson(callInfo));
                     ActivityUtil.startActivity(LocContext.getContext(), intent);
                 }
                 break;
@@ -162,19 +157,18 @@ public class CallFunc implements ICallNotification, ICtdNotification {
             //去电
             case CALL_GOING:
                 LogUtil.i(UIConstants.DEMO_TAG, "call going!");
+
                 if (obj instanceof CallInfo) {
                     CallInfo callInfo = (CallInfo) obj;
 
                     //这里其实可以判断是否是主动接入会议的呼叫,若是会议，可以考虑跳转至会议界面
+
                     Intent intent = new Intent(IntentConstant.CALL_OUT_ACTIVITY_ACTION);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.addCategory(IntentConstant.DEFAULT_CATEGORY);
 
-                    intent.putExtra(UIConstants.CALL_INFO, callInfo);
-
-//                    PreferencesHelper.saveData(UIConstants.CALL_INFO, callInfo);
-                    SPStaticUtils.put(UIConstants.CALL_INFO, gson.toJson(callInfo));
-
+//                    intent.putExtra(UIConstants.CALL_INFO, callInfo);
+                    SPStaticUtils.put(UIConstants.CALL_INFO,gson.toJson(callInfo));
                     ActivityUtil.startActivity(LocContext.getContext(), intent);
                 }
                 break;
@@ -298,11 +292,9 @@ public class CallFunc implements ICallNotification, ICtdNotification {
                     Intent intent = new Intent(IntentConstant.CALL_OUT_ACTIVITY_ACTION);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.addCategory(IntentConstant.DEFAULT_CATEGORY);
-                    intent.putExtra(UIConstants.CALL_INFO, callInfo);
+//                    intent.putExtra(UIConstants.CALL_INFO, callInfo);
 
-//                    PreferencesHelper.saveData(UIConstants.CALL_INFO, callInfo);
-                    SPStaticUtils.put(UIConstants.CALL_INFO, gson.toJson(callInfo));
-
+                    SPStaticUtils.put(UIConstants.CALL_INFO,gson.toJson(callInfo));
                     ActivityStack.getIns().popup(ActivityStack.getIns().getCurActivity());
                     ActivityUtil.startActivity(LocContext.getContext(), intent);
                 }
@@ -318,11 +310,9 @@ public class CallFunc implements ICallNotification, ICtdNotification {
                     Intent intent = new Intent(IntentConstant.VIDEO_ACTIVITY_ACTION);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.addCategory(IntentConstant.DEFAULT_CATEGORY);
-                    intent.putExtra(UIConstants.CALL_INFO, callInfo);
-//                    PreferencesHelper.saveData(UIConstants.CALL_INFO, callInfo);
+//                    intent.putExtra(UIConstants.CALL_INFO, callInfo);
 
-                    SPStaticUtils.put(UIConstants.CALL_INFO, gson.toJson(callInfo));
-
+                    SPStaticUtils.put(UIConstants.CALL_INFO,gson.toJson(callInfo));
                     ActivityStack.getIns().popup(ActivityStack.getIns().getCurActivity());
                     ActivityUtil.startActivity(LocContext.getContext(), intent);
                 }

@@ -46,7 +46,6 @@ public class ConfFunc implements IConfNotification {
 
     private ConfFunc() {
         LocBroadcast.getInstance().registerBroadcast(receiver, broadcastNames);
-        LocBroadcast.getInstance().registerBroadcast(receiver, broadcastNames);
     }
 
     private Handler mHandler = new Handler(Looper.getMainLooper()) {
@@ -69,14 +68,11 @@ public class ConfFunc implements IConfNotification {
                     break;
 
                 case QUERY_CONF_LIST_FAILED:
-                    ToastHelper.showShort("会议召集成功");
-                    Toast.makeText(LocContext.getContext(), "query conf list failed.",
-                            Toast.LENGTH_SHORT).show();
+                    ToastHelper.showShort("query conf list failed");
                     break;
 
                 case QUERY_CONF_DETAIL_FAILED:
-                    Toast.makeText(LocContext.getContext(), "query conf detail failed.->" + msg.obj,
-                            Toast.LENGTH_SHORT).show();
+                    ToastHelper.showShort("query conf detail failed.->" + msg.obj);
                     break;
 
                 case JOIN_VOICE_CONF_SUCCESS:
@@ -90,10 +86,6 @@ public class ConfFunc implements IConfNotification {
                         intent.putExtra(UIConstants.CONF_ID, confID);
                         intent.putExtra(UIConstants.IS_SVC_VIDEO_CONF, false);
                         intent.putExtra(UIConstants.IS_VIDEO_CONF, false);
-                        intent.putExtra(UIConstants.CALL_INFO, voiceCallInfo);
-
-//                        PreferencesHelper.saveData(UIConstants.CALL_INFO, voiceCallInfo);
-
                         SPStaticUtils.put(UIConstants.CALL_INFO, gson.toJson(voiceCallInfo));
                         ActivityUtil.startActivity(LocContext.getContext(), intent);
                     }
@@ -110,9 +102,6 @@ public class ConfFunc implements IConfNotification {
                         intent.putExtra(UIConstants.CONF_ID, confID);
                         intent.putExtra(UIConstants.IS_SVC_VIDEO_CONF, ((TsdkConference) msg.obj).isSvcConf());
                         intent.putExtra(UIConstants.IS_VIDEO_CONF, true);
-                        intent.putExtra(UIConstants.CALL_INFO, videoCallInfo);
-
-//                        PreferencesHelper.saveData(UIConstants.CALL_INFO, videoCallInfo);
 
                         SPStaticUtils.put(UIConstants.CALL_INFO, gson.toJson(videoCallInfo));
                         ActivityUtil.startActivity(LocContext.getContext(), intent);

@@ -521,8 +521,10 @@ public class MeetingMgr implements IMeetingMgr {
         bookConfInfo.setSize(bookConferenceInfo.getSize());
         bookConfInfo.setIsAutoRecord(bookConferenceInfo.getIs_auto() ? 1 : 0);
         bookConfInfo.setRecordMode(bookConferenceInfo.getRecordType());
-        // 创建会议时设置为多流视频会议
+        // 创建会议时设置为多流视频会议--1:多流会议
         bookConfInfo.setIsMultiStreamConf(1);
+
+//        bookConfInfo.setIsMultiStreamConf(2);
 
         List<TsdkAttendeeBaseInfo> attendeeList = ConfConvertUtil.memberListToAttendeeList(bookConferenceInfo.getMemberList());
         bookConfInfo.setAttendeeList(attendeeList);

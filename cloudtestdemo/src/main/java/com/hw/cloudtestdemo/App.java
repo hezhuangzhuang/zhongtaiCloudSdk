@@ -1,36 +1,12 @@
 package com.hw.cloudtestdemo;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.Application;
-import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 
-import com.huawei.opensdk.callmgr.CallMgr;
-import com.huawei.opensdk.callmgr.ctdservice.CtdMgr;
 import com.huawei.opensdk.commonservice.common.common.LocContext;
-import com.huawei.opensdk.commonservice.common.util.CrashUtil;
-import com.huawei.opensdk.commonservice.common.util.LogUtil;
-import com.huawei.opensdk.contactservice.eaddr.EnterpriseAddressBookMgr;
-import com.huawei.opensdk.demoservice.MeetingMgr;
-import com.huawei.opensdk.loginmgr.LoginMgr;
 import com.huawei.opensdk.servicemgr.ServiceMgr;
-import com.hw.cloudlibrary.ecsdk.common.UIConstants;
-import com.hw.cloudlibrary.ecsdk.login.CallFunc;
-import com.hw.cloudlibrary.ecsdk.login.ConfFunc;
-import com.hw.cloudlibrary.ecsdk.login.EnterpriseAddrBookFunc;
-import com.hw.cloudlibrary.ecsdk.login.LoginFunc;
-import com.hw.cloudlibrary.ecsdk.utils.FileUtil;
-import com.hw.cloudlibrary.inter.HuaweiLoginImp;
-import com.hw.cloudlibrary.utils.Constants;
-import com.hw.cloudlibrary.utils.ZipUtil;
 import com.zxy.recovery.core.Recovery;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
 
 /**
  * author：Thinkpad

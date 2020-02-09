@@ -18,7 +18,7 @@
         android:visibility="visible" />
 
     <FrameLayout
-        android:id="@+id/conf_share_layout"
+        android:id="@+id/big_remote_view"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:background="@android:color/darker_gray"></FrameLayout>

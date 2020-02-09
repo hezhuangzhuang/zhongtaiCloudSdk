@@ -18,7 +18,6 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-
             <TextView
                 android:id="@+id/tv_current_number"
                 android:layout_width="match_parent"
@@ -28,14 +27,13 @@
                 android:text="当前登录账号:"
                 android:textColor="@color/color_333" />
 
-
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
                 android:background="@color/color_ccc"
                 android:gravity="center"
                 android:paddingTop="12dp"
-                android:layout_marginTop="20dp"
                 android:paddingBottom="12dp"
                 android:text="点对点呼叫"
                 android:textColor="@color/color_333" />
@@ -103,7 +101,8 @@
                 android:singleLine="true"
                 android:text="00991116072120"
                 android:textColor="@color/color_333"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:visibility="gone" />
 
             <Button
                 android:id="@+id/bt_join"
@@ -152,6 +151,19 @@
                 android:paddingBottom="12dp"
                 android:textColor="@color/color_333" />
 
+            <EditText
+                android:id="@+id/et_start_time"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/shape_bg_number"
+                android:hint="请输入开始时间"
+                android:paddingLeft="12dp"
+                android:paddingTop="12dp"
+                android:paddingRight="12dp"
+                android:paddingBottom="12dp"
+                android:textColor="@color/color_333" />
+
             <Button
                 android:id="@+id/bt_create_conf"
                 android:layout_width="match_parent"
@@ -167,21 +179,20 @@
                 android:layout_weight="1" />
 
 
-
             <Button
                 android:id="@+id/bt_my_conf"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
                 android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp"
                 android:text="我的会议" />
 
             <Button
                 android:id="@+id/bt_logout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
                 android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp"
                 android:text="登出" />
         </LinearLayout>
     </ScrollView>
