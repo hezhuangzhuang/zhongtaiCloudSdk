@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include
+        android:id="@+id/date_conf_rl"
+        layout="@layout/include_conference_data" />
+
+    <include layout="@layout/title_transparent" />
+
+    <RelativeLayout
+        android:id="@+id/barrage_layout"
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="50dp"
+        android:background="@android:color/transparent">
+
+    </RelativeLayout>
+
+    <FrameLayout
+        android:id="@+id/local_video_view"
+        android:layout_width="1dp"
+        android:layout_height="1dp"
+        android:visibility="visible" />
+
+    <FrameLayout
+        android:id="@+id/hide_video_view"
+        android:layout_width="1dp"
+        android:layout_height="1dp"
+        android:visibility="visible" />
+
+    <com.hw.cloudlibrary.widget.floatView.annotation.widget.DragFloatActionButton
+        android:id="@+id/anno_float_button"
+        android:layout_width="@dimen/dp46"
+        android:layout_height="@dimen/dp46"
+        android:layout_gravity="bottom|left"
+        android:layout_marginLeft="@dimen/dp10"
+        android:layout_marginBottom="@dimen/dp66"
+        android:src="@drawable/anno_btn"
+        android:visibility="gone"
+        app:fab_colorNormal="@color/tran"
+        app:fab_colorPressed="@color/tran"
+        app:fab_colorRipple="#99FFFFFF"
+        app:fab_shadowRadius="@dimen/dp12"
+        app:fab_shadowXOffset="0dp"
+        app:fab_shadowYOffset="1dp"
+        tools:visibility="visible" />
+
+    <com.hw.cloudlibrary.widget.floatView.annotation.widget.AnnoToolBar
+        android:id="@+id/anno_toolbar"
+        android:layout_width="@dimen/dp340"
+        android:layout_height="@dimen/dp48"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="@dimen/dp30"
+        android:visibility="gone"
+        tools:visibility="visible" />
+</FrameLayout>

@@ -23,7 +23,6 @@ public class SvcMemberInfo {
 
     private int totalWatchablePage;
 
-
     public SvcMemberInfo() {
         this.svcLabel = new ArrayList<>();
         this.watchableMemberList = new ArrayList<>();

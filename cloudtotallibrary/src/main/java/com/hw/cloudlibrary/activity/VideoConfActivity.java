@@ -47,6 +47,7 @@ import com.hw.cloudlibrary.adapter.ConfControlItem;
 import com.hw.cloudlibrary.ecsdk.common.UIConstants;
 import com.hw.cloudlibrary.ecsdk.login.CallFunc;
 import com.hw.cloudlibrary.utils.DensityUtil;
+import com.hw.cloudlibrary.utils.DeviceUtil;
 import com.hw.cloudlibrary.utils.StatusBarUtils;
 import com.hw.cloudlibrary.utils.ToastHelper;
 import com.hw.cloudlibrary.utils.sharedpreferences.SPStaticUtils;
@@ -60,6 +61,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static com.huawei.ecterminalsdk.base.TsdkConfRole.TSDK_E_CONF_ROLE_CHAIRMAN;
 
 /**
@@ -67,6 +69,7 @@ import static com.huawei.ecterminalsdk.base.TsdkConfRole.TSDK_E_CONF_ROLE_CHAIRM
  */
 public class VideoConfActivity extends BaseLibActivity implements View.OnClickListener, LocBroadcastReceiver {
     private static final int ADD_LOCAL_VIEW = 101;
+    public static final String TAG = "VideoConfActivity";
 
     private String[] mActions = new String[]{
             CustomBroadcastConstants.CONF_STATE_UPDATE,
@@ -93,11 +96,19 @@ public class VideoConfActivity extends BaseLibActivity implements View.OnClickLi
             CustomBroadcastConstants.CANCEL_BROADCAST_CONF_RESULT,
             CustomBroadcastConstants.REQUEST_CHAIRMAN_RESULT,
             CustomBroadcastConstants.RELEASE_CHAIRMAN_RESULT,
-            CustomBroadcastConstants.SPEAKER_LIST_IND,
+            //发言人通知--CustomBroadcastConstants.SPEAKER_LIST_IND
+            // CustomBroadcastConstants.SPEAKER_LIST_IND,
             CustomBroadcastConstants.GET_CONF_END,
             CustomBroadcastConstants.SCREEN_SHARE_STATE,
-            CustomBroadcastConstants.STATISTIC_LOCAL_QOS,
-            CustomBroadcastConstants.GET_SVC_WATCH_INFO
+            //网络情况--CustomBroadcastConstants.STATISTIC_LOCAL_QOS
+            //CustomBroadcastConstants.STATISTIC_LOCAL_QOS,
+            CustomBroadcastConstants.GET_SVC_WATCH_INFO,
+            CustomBroadcastConstants.RESUME_JOIN_CONF_RESULT,
+            CustomBroadcastConstants.RESUME_JOIN_CONF_IND,
+            CustomBroadcastConstants.LOGIN_STATUS_RESUME_IND,
+            CustomBroadcastConstants.LOGIN_STATUS_RESUME_RESULT,
+            CustomBroadcastConstants.LOGIN_FAILED,
+            CustomBroadcastConstants.JOIN_CONF_FAILED
     };
 
     /*会控顶部*/
@@ -153,6 +164,14 @@ public class VideoConfActivity extends BaseLibActivity implements View.OnClickLi
     // svc会议的小窗口是否隐藏
     private boolean isHideVideoWindow = false;
 
+    // 是否有人正在共享
+    private boolean isSharing = false;
+
+    // 自己是否正在共享
+    private boolean isShareOwner = false;
+
+    private int currentShowSmallWndCount = 0;
+
     private List<Long> svcLabel = MeetingMgr.getInstance().getSvcConfInfo().getSvcLabel();
     private Map<String, Integer> watchMap = new IdentityHashMap<>();
 
@@ -162,8 +181,8 @@ public class VideoConfActivity extends BaseLibActivity implements View.OnClickLi
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case ADD_LOCAL_VIEW:
-
-                    setAvcVideoContainer(mLocalView, mRemoteView, mHideView);
+//                    setAvcVideoContainer(mLocalView, mRemoteView, mHideView);
+                    updateLocalVideo();
 
                     setAutoRotation(thisVideoActivity, true);
                     break;
@@ -238,6 +257,9 @@ public class VideoConfActivity extends BaseLibActivity implements View.OnClickLi
             StatusBarUtils.setTranslucentForImageView(this);
         }
 
+        //设置会议画面的高度
+        setConfVideoSize(false);
+
         // 保持屏幕常亮
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
@@ -303,7 +325,7 @@ public class VideoConfActivity extends BaseLibActivity implements View.OnClickLi
         return VideoMgr.getInstance().getLocalVideoView();
     }
 
-    public SurfaceView getRemoteVideoView() {
+    public SurfaceView getRemoteBigVideoView() {
         return VideoMgr.getInstance().getRemoteBigVideoView();
     }
 
@@ -539,9 +561,79 @@ public class VideoConfActivity extends BaseLibActivity implements View.OnClickLi
 
         LocBroadcast.getInstance().registerBroadcast(this, mActions);
 
-        setAvcVideoContainer(mLocalView, mRemoteView, mHideView);
+        if (isSvcConf) {
+            if (isOnlyLocal) {
+                setOnlyLocalVideoContainer(this, mRemoteView, mHideView);
+                mConfSmallVideoWndLL.setVisibility(View.GONE);
+                isSetOnlyLocalWind = true;
+            } else {
+                setSvcAllVideoContainer(this,
+                        mConfLocalVideoLayout,
+                        mRemoteView,
+                        mHideView,
+                        mConfRemoteSmallVideoLayout_01,
+                        mConfRemoteSmallVideoLayout_02,
+                        mConfRemoteSmallVideoLayout_03);
+                if (!isHideVideoWindow) {
+                    mConfSmallVideoWndLL.setVisibility(View.VISIBLE);
+                }
+                isSetOnlyLocalWind = false;
+            }
+        } else {
+            // AVC会议保持原逻辑不变
+            setAvcVideoContainer(
+                    mConfLocalVideoLayout,
+                    mRemoteView,
+                    mHideView);
+        }
 
         setAutoRotation(this, true);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (!isVideo) {
+            return;
+        }
+        closeOrOpenLocalVideo(false);
+    }
+
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (isVideo) {
+            if (!DeviceUtil.isAppForeground()) {
+                closeOrOpenLocalVideo(true);
+            }
+        }
+
+//        isFirstStart = true;
+//        isPressTouch = false;
+//        isShowBar = false;
+    }
+
+    /**
+     * 关闭或打开摄像头
+     *
+     * @param close     true：关闭，false：打开
+     * @return
+     */
+    public boolean closeOrOpenLocalVideo(boolean close) {
+        long callID = MeetingMgr.getInstance().getCurrentConferenceCallID();
+        if (callID == 0) {
+            return false;
+        }
+
+        if (close) {
+            CallMgr.getInstance().closeCamera(callID);
+        } else {
+            CallMgr.getInstance().openCamera(callID);
+            VideoMgr.getInstance().setVideoOrient(callID, mCameraIndex);
+        }
+
+        return true;
     }
 
     @Override
@@ -567,7 +659,7 @@ public class VideoConfActivity extends BaseLibActivity implements View.OnClickLi
     @Override
     public void onReceive(String broadcastName, Object obj) {
         final int result;
-        LogUtil.d("VideoConfActivity", broadcastName + "-->" + obj);
+        LogUtil.d(UIConstants.DEMO_TAG, broadcastName + "-->" + obj);
         switch (broadcastName) {
             case CustomBroadcastConstants.CONF_STATE_UPDATE:
                 String conferenceID = (String) obj;
@@ -596,14 +688,30 @@ public class VideoConfActivity extends BaseLibActivity implements View.OnClickLi
                 //刷新列表
                 refreshMemberList(memberList);
 
+                //SVC 会议时的处理
+                refreshWatchMemberPage();
+
+                //刷新选看窗口的显示名称
+                refreshSvcWatchDisplayName(memberList);
+
+                //远端小窗口+本地窗口数
+                int num = MeetingMgr.getInstance().getCurrentWatchSmallCount() + 1;
+                if (currentShowSmallWndCount != num) {
+                    currentShowSmallWndCount = num;
+                    //设置其他画面是否显示
+                    setSmallVideoVisible(currentShowSmallWndCount);
+                }
+
                 for (final Member member : memberList) {
-                    LogUtil.d("CONF_STATE_UPDATE", member.toString());
+                    LogUtil.d(UIConstants.DEMO_TAG, member.toString());
                     if (member.isSelf()) {
                         postRunOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 //设置麦克风状态
                                 setMicStatus(member.isMute());
+
+                                updateAttendeeButton(member);
                             }
                         });
                     }
@@ -670,7 +778,7 @@ public class VideoConfActivity extends BaseLibActivity implements View.OnClickLi
             // 邀请与会者结果
             case CustomBroadcastConstants.ADD_ATTENDEE_RESULT:
                 result = (int) obj;
-                LogUtil.i(UIConstants.DEMO_TAG, "add attendee result: " + result);
+                LogUtil.d(UIConstants.DEMO_TAG, "add attendee result: " + result);
                 if (result != 0) {
                     showToast("邀请与会者失败");
                     return;
@@ -680,7 +788,7 @@ public class VideoConfActivity extends BaseLibActivity implements View.OnClickLi
             // 删除与会者结果
             case CustomBroadcastConstants.DEL_ATTENDEE_RESULT:
                 result = (int) obj;
-                LogUtil.i(UIConstants.DEMO_TAG, "add attendee result: " + result);
+                LogUtil.d(UIConstants.DEMO_TAG, "add attendee result: " + result);
                 if (result != 0) {
                     showToast("删除与会者失败");
                     return;
@@ -749,7 +857,7 @@ public class VideoConfActivity extends BaseLibActivity implements View.OnClickLi
                 if (svcWatchInfo.getWatchAttendeeNum() <= 0 || svcLabel.size() <= 0) {
                     return;
                 }
-//                showSvcWatchInfo(svcWatchInfo.getWatchAttendees());
+                showSvcWatchInfo(svcWatchInfo.getWatchAttendees());
                 break;
 
             default:
@@ -805,7 +913,7 @@ public class VideoConfActivity extends BaseLibActivity implements View.OnClickLi
                 //静音会议
                 ivMuteConf.setImageResource(currentConfBaseInfo.isMuteAll() ? R.mipmap.ic_close_all_mic : R.mipmap.ic_open_all_mic);
 
-                tvConfName.setText("会议名称:" + currentConfBaseInfo.getSubject() + "\n会议密码:" + currentConfBaseInfo.getGuestPwd());
+                tvConfName.setText("会议名称:" + currentConfBaseInfo.getSubject() + "\n会议ID:" + currentConfBaseInfo.getConfID());
             }
         });
     }
@@ -848,7 +956,7 @@ public class VideoConfActivity extends BaseLibActivity implements View.OnClickLi
 
     public void videoDestroy() {
         if (null != CallMgr.getInstance().getVideoDevice()) {
-            LogUtil.i(UIConstants.DEMO_TAG, "onCallClosed destroy.");
+            LogUtil.d(UIConstants.DEMO_TAG, "onCallClosed destroy.");
             CallMgr.getInstance().videoDestroy();
         }
     }
@@ -907,6 +1015,24 @@ public class VideoConfActivity extends BaseLibActivity implements View.OnClickLi
         //更新状态静音按钮状态
         tvMic.setCompoundDrawablesWithIntrinsicBounds(0, currentMuteStatus ? R.mipmap.icon_mic_close : R.mipmap.icon_mic, 0, 0);
     }
+
+    /**
+     * 更新自己的状态
+     *
+     * @param member
+     */
+    public void updateAttendeeButton(final Member member) {
+        this.isShareOwner = member.isShareOwner();
+        mCallInfo.setVideoCall(member.isVideo());
+        if (!isVideo || !isSvcConf) {
+            return;
+        }
+        if (isOnlyLocal || isHideVideoWindow) {
+            return;
+        }
+        mConfLocalVideoText.setText("(我)" + member.getDisplayName());
+    }
+
 
     //摄像头方向
     private int mCameraIndex = CallConstant.FRONT_CAMERA;
@@ -1302,6 +1428,7 @@ public class VideoConfActivity extends BaseLibActivity implements View.OnClickLi
 
     /************************显示远端画面-start***********************/
     public void refreshWatchMemberPage() {
+        LogUtil.d(UIConstants.DEMO_TAG, "refreshWatchMemberPage");
         final int currentPage = MeetingMgr.getInstance().getCurrentWatchPage();
         final int totalPage = MeetingMgr.getInstance().getTotalWatchablePage();
         final int watchSum = MeetingMgr.getInstance().getWatchSum();
@@ -1311,6 +1438,8 @@ public class VideoConfActivity extends BaseLibActivity implements View.OnClickLi
         } else {
             isOnlyLocal = false;
         }
+
+        //更新本地画面
         updateLocalVideo();
 
         if (isHideVideoWindow) {
@@ -1354,6 +1483,7 @@ public class VideoConfActivity extends BaseLibActivity implements View.OnClickLi
         if (isHideVideoWindow) {
             return;
         }
+
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -1454,7 +1584,51 @@ public class VideoConfActivity extends BaseLibActivity implements View.OnClickLi
             }
         });
     }
-//
+
+    /**
+     * 刷新svc会场的显示信息
+     *
+     * @param list
+     */
+    private void refreshSvcWatchDisplayName(List<Member> list) {
+        if (null == watchMap || watchMap.isEmpty()) {
+            return;
+        }
+
+        for (Member member : list) {
+            for (String key : watchMap.keySet()) {
+                if (member.getNumber().equals(key)) {
+                    switch (watchMap.get(key)) {
+                        case REMOTE_DISPLAY:
+                            remoteDisplay = member.getDisplayName();
+                            break;
+
+                        case SMALL_DISPLAY_01:
+                            smallDisplay_01 = member.getDisplayName();
+                            break;
+
+                        case SMALL_DISPLAY_02:
+                            smallDisplay_02 = member.getDisplayName();
+                            break;
+
+                        case SMALL_DISPLAY_03:
+                            smallDisplay_03 = member.getDisplayName();
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+
+        //刷新名称
+        refreshSvcWatchDisplayName(
+                remoteDisplay,
+                smallDisplay_01,
+                smallDisplay_02,
+                smallDisplay_03);
+    }
 
     /**
      * 显示远端的名称
@@ -1506,16 +1680,21 @@ public class VideoConfActivity extends BaseLibActivity implements View.OnClickLi
                         if (isSetOnlyLocalWind) {
                             return;
                         }
+
+                        //只有本地画面时
                         setOnlyLocalVideoContainer(
                                 VideoConfActivity.this,
                                 mRemoteView,
                                 mHideView);
+
                         mConfSmallVideoWndLL.setVisibility(View.GONE);
+
                         isSetOnlyLocalWind = true;
                     } else {
                         if (!isSetOnlyLocalWind) {
                             return;
                         }
+
                         //多流会议
                         setSvcAllVideoContainer(
                                 VideoConfActivity.this,
@@ -1527,6 +1706,7 @@ public class VideoConfActivity extends BaseLibActivity implements View.OnClickLi
                                 mConfRemoteSmallVideoLayout_03);
 
                         mConfSmallVideoWndLL.setVisibility(View.VISIBLE);
+
                         isSetOnlyLocalWind = false;
                     }
                 } else {
@@ -1542,8 +1722,6 @@ public class VideoConfActivity extends BaseLibActivity implements View.OnClickLi
     }
 
 
-
-
     private static final int REMOTE_DISPLAY = 0;
     private static final int SMALL_DISPLAY_01 = 1;
     private static final int SMALL_DISPLAY_02 = 2;
@@ -1554,6 +1732,11 @@ public class VideoConfActivity extends BaseLibActivity implements View.OnClickLi
     private String smallDisplay_02 = "";
     private String smallDisplay_03 = "";
 
+    /**
+     * 存储远端画面的名称
+     *
+     * @param watchAttendees
+     */
     private void showSvcWatchInfo(List<TsdkConfSvcWatchAttendee> watchAttendees) {
         watchMap.clear();
         for (TsdkConfSvcWatchAttendee watchAttendee : watchAttendees) {
@@ -1574,6 +1757,7 @@ public class VideoConfActivity extends BaseLibActivity implements View.OnClickLi
                 watchMap.put(watchAttendee.getBaseInfo().getNumber(), SMALL_DISPLAY_03);
             }
         }
+        //显示远端画面的名称
         refreshSvcWatchDisplayName(
                 remoteDisplay,
                 smallDisplay_01,
@@ -1591,6 +1775,12 @@ public class VideoConfActivity extends BaseLibActivity implements View.OnClickLi
     public void setOnlyLocalVideoContainer(Context context,
                                            ViewGroup bigLayout,
                                            ViewGroup hideLayout) {
+
+        LogUtil.d(UIConstants.DEMO_TAG, "setOnlyLocalVideoContainer");
+
+        //隐藏本地小画面
+        mLocalView.setVisibility(View.GONE);
+
         if (bigLayout != null) {
             addSurfaceView(bigLayout, getLocalVideoView());
         }
@@ -1608,25 +1798,96 @@ public class VideoConfActivity extends BaseLibActivity implements View.OnClickLi
             ViewGroup bigLayout,
             ViewGroup hideLayout) {
 
+        LogUtil.d(UIConstants.DEMO_TAG, "setAvcVideoContainer");
+
         addSurfaceView(mConfLocalVideoLayout, getLocalVideoView());
 
         addSurfaceView(smallLayout, getLocalVideoView());
-        addSurfaceView(bigLayout, getRemoteVideoView());
+        addSurfaceView(bigLayout, getRemoteBigVideoView());
         addSurfaceView(hideLayout, getHideVideoView());
     }
 
     /**
      * 设置多流会议画面
+     *
      * @param videoConfActivity
-     * @param mConfLocalVideoLayout
+     * @param smallLayout
      * @param mRemoteView
+     * @param mHideView
      * @param mHideView
      * @param mConfRemoteSmallVideoLayout_01
      * @param mConfRemoteSmallVideoLayout_02
      * @param mConfRemoteSmallVideoLayout_03
      */
-    private void setSvcAllVideoContainer(VideoConfActivity videoConfActivity, FrameLayout mConfLocalVideoLayout, FrameLayout mRemoteView, FrameLayout mHideView, FrameLayout mConfRemoteSmallVideoLayout_01, FrameLayout mConfRemoteSmallVideoLayout_02, FrameLayout mConfRemoteSmallVideoLayout_03) {
+    private void setSvcAllVideoContainer(VideoConfActivity videoConfActivity,
+                                         FrameLayout smallLayout,
+                                         FrameLayout mRemoteView,
+                                         FrameLayout mHideView,
+                                         FrameLayout mConfRemoteSmallVideoLayout_01,
+                                         FrameLayout mConfRemoteSmallVideoLayout_02,
+                                         FrameLayout mConfRemoteSmallVideoLayout_03) {
 
+        LogUtil.d(UIConstants.DEMO_TAG, "setSvcAllVideoContainer");
+
+        mLocalView.setVisibility(View.GONE);
+
+        if (smallLayout != null) {
+            addSurfaceView(smallLayout, getLocalVideoView());
+        }
+
+        if (mRemoteView != null) {
+            addSurfaceView(mRemoteView, getRemoteBigVideoView());
+        }
+
+        if (mConfRemoteSmallVideoLayout_01 != null) {
+            addSurfaceView(mConfRemoteSmallVideoLayout_01, getRemoteSmallVideoView_01());
+        }
+
+        if (mConfRemoteSmallVideoLayout_02 != null) {
+            addSurfaceView(mConfRemoteSmallVideoLayout_02, getRemoteSmallVideoView_02());
+        }
+
+        if (mConfRemoteSmallVideoLayout_03 != null) {
+            addSurfaceView(mConfRemoteSmallVideoLayout_03, getRemoteSmallVideoView_03());
+        }
+
+        if (mHideView != null) {
+            addSurfaceView(mHideView, getHideVideoView());
+        }
+    }
+
+    /**
+     * 设置会议画面的高度
+     *
+     * @param isVertical
+     */
+    private void setConfVideoSize(boolean isVertical) {
+        // 获取屏幕的宽和高
+        int px = DensityUtil.dip2px(40.0f);
+        int mScreenWidth = DensityUtil.getScreenHeight(this) - px;
+        if (isVertical) {
+            mConfVideoBackIV.setRotation(0);
+            mConfVideoForwardIV.setRotation(0);
+            mConfLocalVideoLayout.getLayoutParams().width = mScreenWidth / 4;
+            mConfLocalVideoLayout.getLayoutParams().height = (int) (mScreenWidth / 4 * (16.0 / 9.0));
+            mConfRemoteSmallVideoLayout_01.getLayoutParams().width = mScreenWidth / 4;
+            mConfRemoteSmallVideoLayout_01.getLayoutParams().height = (int) (mScreenWidth / 4 * (16.0 / 9.0));
+            mConfRemoteSmallVideoLayout_02.getLayoutParams().width = mScreenWidth / 4;
+            mConfRemoteSmallVideoLayout_02.getLayoutParams().height = (int) (mScreenWidth / 4 * (16.0 / 9.0));
+            mConfRemoteSmallVideoLayout_03.getLayoutParams().width = mScreenWidth / 4;
+            mConfRemoteSmallVideoLayout_03.getLayoutParams().height = (int) (mScreenWidth / 4 * (16.0 / 9.0));
+        } else {
+            mConfVideoBackIV.setRotation(90);
+            mConfVideoForwardIV.setRotation(90);
+            mConfLocalVideoLayout.getLayoutParams().width = (int) (mScreenWidth / 4 * (16.0 / 9.0));
+            mConfLocalVideoLayout.getLayoutParams().height = mScreenWidth / 4;
+            mConfRemoteSmallVideoLayout_01.getLayoutParams().width = (int) (mScreenWidth / 4 * (16.0 / 9.0));
+            mConfRemoteSmallVideoLayout_01.getLayoutParams().height = mScreenWidth / 4;
+            mConfRemoteSmallVideoLayout_02.getLayoutParams().width = (int) (mScreenWidth / 4 * (16.0 / 9.0));
+            mConfRemoteSmallVideoLayout_02.getLayoutParams().height = mScreenWidth / 4;
+            mConfRemoteSmallVideoLayout_03.getLayoutParams().width = (int) (mScreenWidth / 4 * (16.0 / 9.0));
+            mConfRemoteSmallVideoLayout_03.getLayoutParams().height = mScreenWidth / 4;
+        }
     }
 
     /************************显示远端画面-end***********************/

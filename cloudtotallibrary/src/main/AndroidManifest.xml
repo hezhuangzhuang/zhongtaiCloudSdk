@@ -60,8 +60,10 @@
     <application
         android:allowBackup="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activity.ConfListActivity"></activity>
-        <!-- 点对点视频界面 -->
+
+        <activity
+            android:name=".activity.ConfListActivity"
+            android:screenOrientation="portrait" /> <!-- 点对点视频界面 -->
         <activity
             android:name=".activity.VideoActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -75,6 +77,18 @@
         </activity> <!-- 会议界面 -->
         <activity
             android:name=".activity.VideoConfActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:screenOrientation="landscape">
+            <intent-filter>
+
+                <!-- <action android:name="android.intent.action.conf_manager_activity" /> -->
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.sdkdemo" />
+            </intent-filter>
+        </activity> <!-- 会议界面-grid显示 -->
+        <activity
+            android:name=".activity.VideoConfGridActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="landscape">
             <intent-filter>
@@ -120,6 +134,20 @@
             android:multiprocess="true"
             android:theme="@style/ActivityTranslucent"
             android:windowSoftInputMode="stateHidden|stateAlwaysHidden" />
+
+        <!-- 会议分享界面-->
+        <activity
+            android:name=".activity.ConfShareActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:launchMode="singleTask"
+            android:screenOrientation="sensor">
+            <intent-filter>
+                <action android:name="android.intent.action.conf_data_activity" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.sdkdemo" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

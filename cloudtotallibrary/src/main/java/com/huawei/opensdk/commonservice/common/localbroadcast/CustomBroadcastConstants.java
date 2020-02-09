@@ -29,8 +29,11 @@ public interface CustomBroadcastConstants
     String CONF_CALL_ANSWERED = "com.huawei.opensdk.conf.confcallanswered";
     String LOGIN_SUCCESS = "com.huawei.opensdk.login.success";
     String LOGIN_FAILED = "com.huawei.opensdk.login.failed";
+    String AUTH_FAILED = "com.huawei.opensdk.auth.failed";
     String LOGOUT = "com.huawei.opensdk.login.logout";
     String MODIFY_PWD_SUCCESS = "com.huawei.opensdk.modifypwd.success";
+    String LOGIN_STATUS_RESUME_IND = "com.huawei.opensdk.loginstatusresumeind";
+    String LOGIN_STATUS_RESUME_RESULT = "com.huawei.opensdk.loginstatusresumeresult";
     String MUTE_ATTENDEE_RESULT = "com.huawei.opensdk.conf.muteattendeeresult";
     String UN_MUTE_ATTENDEE_RESULT = "com.huawei.opensdk.conf.unmuteattendeeresult";
     String MUTE_CONF_RESULT = "com.huawei.opensdk.conf.muteconfresult";
@@ -48,12 +51,14 @@ public interface CustomBroadcastConstants
     String POSTPONE_CONF_RESULT = "com.huawei.opensdk.conf.postponeconfresult";
     String SPEAKER_LIST_IND = "com.huawei.opensdk.conf.speakerlistind";
     String STATISTIC_LOCAL_QOS = "com.huawei.opensdk.conf.statisticlocalqos";
+    String RENAME_SELF_RESULT = "com.huawei.opensdk.conf.renameselfresult";
 
     String SET_CONF_MODE_RESULT = "com.huawei.opensdk.conf.setconfmoderesult";
     String HOLD_CALL_RESULT = "com.huawei.opensdk.conf.holdcallresult";
     String CONF_CALL_CONNECTED = "com.huawei.opensdk.conf.confcallconnected";
     String DIVERT_RESULT = "com.huawei.opensdk.conf.divertresult";
     String BLD_TRANSFER_RESULT = "com.huawei.opensdk.conf.bldtransferresult";
+    String JOIN_CONF_FAILED = "com.huawei.opensdk.conf.joinconffailed";
 
     String UPGRADE_CONF_RESULT = "com.huawei.opensdk.conf.upgradeconfresult";
     String WATCH_ATTENDEE_CONF_RESULT = "com.huawei.opensdk.conf.watchattendeeconfresult";
@@ -66,6 +71,8 @@ public interface CustomBroadcastConstants
 
     String CALL_TRANSFER_TO_CONFERENCE = "com.huawei.opensdk.conf.calltransfertoconference";
     String GET_SVC_WATCH_INFO = "com.huawei.opensdk.conf.getsvcwatchinfo";
+    String RESUME_JOIN_CONF_RESULT = "com.huawei.opensdk.conf.resumejoinconfresult";
+    String RESUME_JOIN_CONF_IND = "com.huawei.opensdk.conf.resumejoinconfind";
 
     //DataConf
     String CONF_INFO_PARAM = "com.huawei.opensdk.conf.dataconfparam";

@@ -5,8 +5,31 @@
     <dimen name="toolbar_margin_top">25dp</dimen>
     <dimen name="statusbar_view_height_plus">30dp</dimen>
 
-    <dimen name="dp40">40dp</dimen>
-    <dimen name="dp20">20dp</dimen>
+    <dimen name="dp1">1dp</dimen>
+    <dimen name="dp2">2dp</dimen>
+    <dimen name="dp6">6dp</dimen>
+    <dimen name="dp8">8dp</dimen>
     <dimen name="dp10">10dp</dimen>
+    <dimen name="dp11">11dp</dimen>
+    <dimen name="dp12">12dp</dimen>
+    <dimen name="dp15">15dp</dimen>
+    <dimen name="dp20">20dp</dimen>
+    <dimen name="dp24">24dp</dimen>
+    <dimen name="dp30">30dp</dimen>
+    <dimen name="dp40">40dp</dimen>
+    <dimen name="dp46">46dp</dimen>
+    <dimen name="dp48">48dp</dimen>
+    <dimen name="dp50">50dp</dimen>
+    <dimen name="dp64p5">64.5dp</dimen>
+    <dimen name="dp71">71dp</dimen>
+    <dimen name="dp65">65dp</dimen>
+    <dimen name="dp66">66dp</dimen>
+    <dimen name="dp120">120dp</dimen>
+    <dimen name="dp162">162dp</dimen>
+    <dimen name="dp340">340dp</dimen>
+
+
+    <dimen name="sp8">8sp</dimen>
+    <dimen name="sp12">12sp</dimen>
 
 </resources>
