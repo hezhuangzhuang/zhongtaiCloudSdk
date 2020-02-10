@@ -30,8 +30,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import common.VideoWndType;
-
 /**
  * This class is about video management
  * 视频管理类
@@ -429,6 +427,9 @@ public class VideoMgr {
 
                 tsdkCall.setVideoWindow(list);
 
+                int width = 960;
+                int height = 540;
+
                 //设置SVC远端视频窗口
                 TsdkSvcVideoWndInfo bigSvcVideoWndInfo = new TsdkSvcVideoWndInfo();
                 bigSvcVideoWndInfo.setRender(ViERenderer.getIndexOfSurface(remoteBigVideoView));
@@ -439,21 +440,22 @@ public class VideoMgr {
                 TsdkSvcVideoWndInfo smallSvcVideoWndInfo_01 = new TsdkSvcVideoWndInfo();
                 smallSvcVideoWndInfo_01.setRender(ViERenderer.getIndexOfSurface(remoteSmallVideoView_01));
                 smallSvcVideoWndInfo_01.setLabel(currentSvcLabel.get(1));
-                smallSvcVideoWndInfo_01.setWidth(160); //320
-                smallSvcVideoWndInfo_01.setHeight(90);//180
+                smallSvcVideoWndInfo_01.setWidth(width); //320
+                smallSvcVideoWndInfo_01.setHeight(height);//180
 
                 TsdkSvcVideoWndInfo smallSvcVideoWndInfo_02 = new TsdkSvcVideoWndInfo();
                 smallSvcVideoWndInfo_02.setRender(ViERenderer.getIndexOfSurface(remoteSmallVideoView_02));
                 smallSvcVideoWndInfo_02.setLabel(currentSvcLabel.get(2));
-                smallSvcVideoWndInfo_02.setWidth(160); //320
-                smallSvcVideoWndInfo_02.setHeight(90);//180
+                smallSvcVideoWndInfo_02.setWidth(width); //320
+                smallSvcVideoWndInfo_02.setHeight(height);//180
 
                 TsdkSvcVideoWndInfo smallSvcVideoWndInfo_03 = new TsdkSvcVideoWndInfo();
                 smallSvcVideoWndInfo_03.setRender(ViERenderer.getIndexOfSurface(remoteSmallVideoView_03));
                 smallSvcVideoWndInfo_03.setLabel(currentSvcLabel.get(3));
-                smallSvcVideoWndInfo_03.setWidth(160); //320
-                smallSvcVideoWndInfo_03.setHeight(90);//180
+                smallSvcVideoWndInfo_03.setWidth(width); //320
+                smallSvcVideoWndInfo_03.setHeight(height);//180
 
+                //设置多流画面的信息
                 List<TsdkSvcVideoWndInfo> svcWndInfoList = new ArrayList<>();
                 svcWndInfoList.add(bigSvcVideoWndInfo);
                 svcWndInfoList.add(smallSvcVideoWndInfo_01);
@@ -474,7 +476,6 @@ public class VideoMgr {
         handler.post(new Runnable() {
             @Override
             public void run() {
-
                 ViERenderer.freeLocalRenderResource();
                 if (localVideoView != null) {
                     ViERenderer.setSurfaceNull(localVideoView);

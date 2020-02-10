@@ -187,14 +187,6 @@ public class MeetingMgr implements IMeetingMgr {
         }
     }
 
-//    public void setCurrentConferenceCallID(int callID) {
-//        if (null == currentConference)
-//        {
-//            return;
-//        }
-//        //currentConference.setCallID(callID);
-//    }
-
     public List<Member> getCurrentConferenceMemberList() {
         if (null == currentConference) {
             return null;
@@ -222,31 +214,6 @@ public class MeetingMgr implements IMeetingMgr {
         }
         return this.getConfBaseInfo();
     }
-
-//
-//    public void updateCurrentConferenceBaseInfo(ConfDetailInfo confDetailInfo) {
-//        if (null == currentConference)
-//        {
-//            return;
-//        }
-//
-//        if (getCurrentConferenceBaseInfo().getConfID().equals(confDetailInfo.getConfID()))
-//        {
-//            //currentConference.updateConfInfo(confDetailInfo);
-//        }
-//    }
-//
-
-
-//    public boolean isInDataConf()
-//    {
-//        if (null == currentConference)
-//        {
-//            return false;
-//        }
-//
-//        return true;
-//    }
 
     public Member getSelf() {
         return self;
@@ -276,7 +243,6 @@ public class MeetingMgr implements IMeetingMgr {
     public int getTotalWatchablePage() {
         return svcConfInfo.getTotalWatchablePage();
     }
-
 
     public int getCurrentWatchSmallCount() {
         return svcConfInfo.getCurrentWatchSmallCount();
@@ -627,7 +593,6 @@ public class MeetingMgr implements IMeetingMgr {
             currentConference = null;
             return result;
         }
-
         return 0;
     }
 
@@ -1300,6 +1265,8 @@ public class MeetingMgr implements IMeetingMgr {
             if (ret != 0) {
                 LogUtil.e(TAG, "watchAttendee is return failed.");
                 return ret;
+            } else {
+                LogUtil.e(TAG, "watchAttendee is return true.");
             }
         }
 
@@ -1832,28 +1799,34 @@ public class MeetingMgr implements IMeetingMgr {
             case TSDK_E_CONF_UPGRADE_CONF:
                 mConfNotification.onConfEventNotify(ConfConstant.CONF_EVENT.UPGRADE_CONF_RESULT, ret);
                 break;
+
             //闭音会场
             case TSDK_E_CONF_MUTE_CONF:
                 this.isMuteConf = true;
                 mConfNotification.onConfEventNotify(ConfConstant.CONF_EVENT.MUTE_CONF_RESULT, ret);
                 break;
+
             //取消闭音
             case TSDK_E_CONF_UNMUTE_CONF:
                 this.isMuteConf = false;
                 mConfNotification.onConfEventNotify(ConfConstant.CONF_EVENT.UN_MUTE_CONF_RESULT, ret);
                 break;
+
             //锁定会议
             case TSDK_E_CONF_LOCK_CONF:
                 mConfNotification.onConfEventNotify(ConfConstant.CONF_EVENT.LOCK_CONF_RESULT, ret);
                 break;
+
             //取消锁定
             case TSDK_E_CONF_UNLOCK_CONF:
                 mConfNotification.onConfEventNotify(ConfConstant.CONF_EVENT.UN_LOCK_CONF_RESULT, ret);
                 break;
+
             //添加与会者
             case TSDK_E_CONF_ADD_ATTENDEE:
                 mConfNotification.onConfEventNotify(ConfConstant.CONF_EVENT.ADD_ATTENDEE_RESULT, ret);
                 break;
+
             //删除与会者
             case TSDK_E_CONF_REMOVE_ATTENDEE:
                 mConfNotification.onConfEventNotify(ConfConstant.CONF_EVENT.DEL_ATTENDEE_RESULT, ret);
@@ -1863,54 +1836,67 @@ public class MeetingMgr implements IMeetingMgr {
             case TSDK_E_CONF_MUTE_ATTENDEE:
                 mConfNotification.onConfEventNotify(ConfConstant.CONF_EVENT.MUTE_ATTENDEE_RESULT, ret);
                 break;
+
             //取消闭音与会者
             case TSDK_E_CONF_UNMUTE_ATTENDEE:
                 mConfNotification.onConfEventNotify(ConfConstant.CONF_EVENT.UN_MUTE_ATTENDEE_RESULT, ret);
                 break;
+
             //设置举手
             case TSDK_E_CONF_SET_HANDUP:
                 mConfNotification.onConfEventNotify(ConfConstant.CONF_EVENT.HAND_UP_RESULT, ret);
                 break;
+
             //取消设置举手
             case TSDK_E_CONF_CANCLE_HANDUP:
                 mConfNotification.onConfEventNotify(ConfConstant.CONF_EVENT.CANCEL_HAND_UP_RESULT, ret);
                 break;
+
             //设置会议视频模式
             case TSDK_E_CONF_SET_VIDEO_MODE:
                 mConfNotification.onConfEventNotify(ConfConstant.CONF_EVENT.SET_CONF_MODE_RESULT, ret);
                 break;
+
             //选看与会者
             case TSDK_E_CONF_WATCH_ATTENDEE:
                 mConfNotification.onConfEventNotify(ConfConstant.CONF_EVENT.WATCH_ATTENDEE_RESULT, ret);
                 break;
+
             //广播与会者
             case TSDK_E_CONF_BROADCAST_ATTENDEE:
                 mConfNotification.onConfEventNotify(ConfConstant.CONF_EVENT.BROADCAST_ATTENDEE_RESULT, ret);
                 break;
+
             //取消广播与会者
             case TSDK_E_CONF_CANCEL_BROADCAST_ATTENDEE:
                 mConfNotification.onConfEventNotify(ConfConstant.CONF_EVENT.CANCEL_BROADCAST_RESULT, ret);
                 break;
+
             //申请主席权限
             case TSDK_E_CONF_REQUEST_CHAIRMAN:
                 mConfNotification.onConfEventNotify(ConfConstant.CONF_EVENT.REQUEST_CHAIRMAN_RESULT, ret);
                 break;
+
             //释放主席权限
             case TSDK_E_CONF_RELEASE_CHAIRMAN:
                 mConfNotification.onConfEventNotify(ConfConstant.CONF_EVENT.RELEASE_CHAIRMAN_RESULT, ret);
                 break;
+
             //开始录制会议
             case TSDK_E_CONF_START_RECORD_BROADCAST:
                 mConfNotification.onConfEventNotify(ConfConstant.CONF_EVENT.START_RECORD_RESULT, ret);
                 break;
+
             //停止录制会议
             case TSDK_E_CONF_STOP_RECORD_BROADCAST:
                 mConfNotification.onConfEventNotify(ConfConstant.CONF_EVENT.STOP_RECORD_RESULT, ret);
                 break;
+
             //设置显示名结果
             case TSDK_E_CONF_RENAME_SELF:
                 mConfNotification.onConfEventNotify(ConfConstant.CONF_EVENT.RENAME_SELF, ret);
                 break;
+
             default:
                 break;
         }

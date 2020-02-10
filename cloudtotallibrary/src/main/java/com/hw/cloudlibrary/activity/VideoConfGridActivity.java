@@ -9,7 +9,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialog;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -44,8 +46,11 @@ import com.huawei.opensdk.demoservice.MeetingMgr;
 import com.huawei.opensdk.demoservice.Member;
 import com.hw.cloudlibrary.R;
 import com.hw.cloudlibrary.adapter.ConfControlItem;
+import com.hw.cloudlibrary.adapter.fragment.MyPagerAdapter;
 import com.hw.cloudlibrary.ecsdk.common.UIConstants;
 import com.hw.cloudlibrary.ecsdk.login.CallFunc;
+import com.hw.cloudlibrary.fragment.BigRemoteViewFragment;
+import com.hw.cloudlibrary.fragment.ConfViewFragment;
 import com.hw.cloudlibrary.utils.DensityUtil;
 import com.hw.cloudlibrary.utils.DeviceUtil;
 import com.hw.cloudlibrary.utils.StatusBarUtils;
@@ -68,7 +73,7 @@ import static com.huawei.ecterminalsdk.base.TsdkConfRole.TSDK_E_CONF_ROLE_CHAIRM
  */
 public class VideoConfGridActivity extends BaseLibActivity implements View.OnClickListener, LocBroadcastReceiver {
     private static final int ADD_LOCAL_VIEW = 101;
-    public static final String TAG = "VideoConfActivity";
+    public static final String TAG = "VideoConfGridActivity";
 
     private String[] mActions = new String[]{
             CustomBroadcastConstants.CONF_STATE_UPDATE,
@@ -174,7 +179,6 @@ public class VideoConfGridActivity extends BaseLibActivity implements View.OnCli
     private List<Long> svcLabel = MeetingMgr.getInstance().getSvcConfInfo().getSvcLabel();
     private Map<String, Integer> watchMap = new IdentityHashMap<>();
 
-
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -208,6 +212,9 @@ public class VideoConfGridActivity extends BaseLibActivity implements View.OnCli
     //多画面的容器
     private LinearLayout mConfSmallVideoWndLL;
 
+    private ViewPager vpContent;
+    private MyPagerAdapter pagerAdapter;
+
     @Override
     protected void findViews() {
         mRemoteView = (FrameLayout) findViewById(R.id.big_remote_view);
@@ -226,7 +233,7 @@ public class VideoConfGridActivity extends BaseLibActivity implements View.OnCli
         ivCloseCamera = (ImageView) findViewById(R.id.iv_close_camera);
 
         ivMuteConf = (ImageView) findViewById(R.id.iv_mute_conf);
-        ivMuteConf.setVisibility(View.VISIBLE);
+
 
         ivRequestChair = (ImageView) findViewById(R.id.iv_request_chair);
         ivAddMember = (ImageView) findViewById(R.id.iv_add_member);
@@ -246,6 +253,9 @@ public class VideoConfGridActivity extends BaseLibActivity implements View.OnCli
         mConfVideoForwardIV = (ImageView) findViewById(R.id.watch_next_page);
 
         mConfSmallVideoWndLL = (LinearLayout) findViewById(R.id.conf_video_ll);
+
+        //viewpager
+        vpContent = (ViewPager) findViewById(R.id.vp_content);
     }
 
     @Override
@@ -282,6 +292,77 @@ public class VideoConfGridActivity extends BaseLibActivity implements View.OnCli
         setLoudSpeaker();
 
         ivRequestChair.setVisibility(View.VISIBLE);
+
+        initPagerAdapter();
+    }
+
+    private List<Fragment> fragments = new ArrayList<>();
+
+    /**
+     * 初始化适配器
+     */
+    private void initPagerAdapter() {
+        fragments.add(BigRemoteViewFragment.newInstance());
+        fragments.add(ConfViewFragment.newInstance(1));
+
+        pagerAdapter = new MyPagerAdapter(getSupportFragmentManager(), fragments);
+
+        vpContent.setAdapter(pagerAdapter);
+        vpContent.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int i, float v, int i1) {
+
+            }
+
+            @Override
+            public void onPageSelected(int index) {
+                ToastHelper.showShort("index->" + index);
+                if (index > 0) {
+                    watchAttendee(index);
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int i) {
+
+            }
+        });
+    }
+
+    /**
+     * 判断是否是
+     *
+     * @param isBack
+     */
+    private void turnPage(boolean isBack) {
+        int page = MeetingMgr.getInstance().getCurrentWatchPage();
+        int sumPage = MeetingMgr.getInstance().getTotalWatchablePage();
+        if (isBack) {
+            // 向后翻页
+            if (1 == page) {
+//                showToast(R.string.first_page);
+                return;
+            }
+            page = page - 1;
+        } else {
+            // 向前翻页
+            if (page == sumPage) {
+//                showToast(R.string.last_page);
+                return;
+            }
+            page = page + 1;
+        }
+
+        MeetingMgr.getInstance().watchAttendee(page);
+    }
+
+    /**
+     * 切换显示
+     *
+     * @param page
+     */
+    private void watchAttendee(int page) {
+        MeetingMgr.getInstance().watchAttendee(page);
     }
 
     @Override
@@ -301,9 +382,8 @@ public class VideoConfGridActivity extends BaseLibActivity implements View.OnCli
 
     @Override
     protected int getLayoutId() {
-        return R.layout.activity_video_conf;
+        return R.layout.activity_video_conf_grid;
     }
-
 
     private void addSurfaceView(ViewGroup container, SurfaceView child) {
         if (child == null) {
@@ -572,6 +652,7 @@ public class VideoConfGridActivity extends BaseLibActivity implements View.OnCli
                         mConfRemoteSmallVideoLayout_01,
                         mConfRemoteSmallVideoLayout_02,
                         mConfRemoteSmallVideoLayout_03);
+
                 if (!isHideVideoWindow) {
                     mConfSmallVideoWndLL.setVisibility(View.VISIBLE);
                 }
@@ -615,7 +696,7 @@ public class VideoConfGridActivity extends BaseLibActivity implements View.OnCli
     /**
      * 关闭或打开摄像头
      *
-     * @param close     true：关闭，false：打开
+     * @param close true：关闭，false：打开
      * @return
      */
     public boolean closeOrOpenLocalVideo(boolean close) {
@@ -657,9 +738,10 @@ public class VideoConfGridActivity extends BaseLibActivity implements View.OnCli
     @Override
     public void onReceive(String broadcastName, Object obj) {
         final int result;
-        LogUtil.d(UIConstants.DEMO_TAG, broadcastName + "-->" + obj);
+        LogUtil.d(UIConstants.DEMO_TAG, "收到广播" + broadcastName + "-->" + obj);
         switch (broadcastName) {
             case CustomBroadcastConstants.CONF_STATE_UPDATE:
+                LogUtil.d(UIConstants.DEMO_TAG, "CustomBroadcastConstants.CONF_STATE_UPDATE-->" + obj);
                 String conferenceID = (String) obj;
                 if (!conferenceID.equals(confID)) {
                     return;
@@ -667,7 +749,6 @@ public class VideoConfGridActivity extends BaseLibActivity implements View.OnCli
 
                 //判断会议状态，如果会议结束，则关闭会议界面
                 ConfBaseInfo confBaseInfo = getCurrentConfBaseInfo();
-
 
                 if (null == confBaseInfo) {
                     return;
@@ -686,7 +767,7 @@ public class VideoConfGridActivity extends BaseLibActivity implements View.OnCli
                 //刷新列表
                 refreshMemberList(memberList);
 
-                //SVC 会议时的处理
+                //SVC:多流会议时的处理
                 refreshWatchMemberPage();
 
                 //刷新选看窗口的显示名称
@@ -701,7 +782,6 @@ public class VideoConfGridActivity extends BaseLibActivity implements View.OnCli
                 }
 
                 for (final Member member : memberList) {
-                    LogUtil.d(UIConstants.DEMO_TAG, member.toString());
                     if (member.isSelf()) {
                         postRunOnUiThread(new Runnable() {
                             @Override
@@ -717,6 +797,7 @@ public class VideoConfGridActivity extends BaseLibActivity implements View.OnCli
                 break;
 
             case CustomBroadcastConstants.GET_CONF_END:
+                LogUtil.d(UIConstants.DEMO_TAG, "CustomBroadcastConstants.GET_CONF_END-->" + obj);
                 postRunOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -727,6 +808,7 @@ public class VideoConfGridActivity extends BaseLibActivity implements View.OnCli
                 break;
 
             case CustomBroadcastConstants.ADD_LOCAL_VIEW:
+                LogUtil.d(UIConstants.DEMO_TAG, "CustomBroadcastConstants.ADD_LOCAL_VIEW-->" + obj);
                 mHandler.sendEmptyMessage(ADD_LOCAL_VIEW);
                 break;
 
@@ -851,6 +933,8 @@ public class VideoConfGridActivity extends BaseLibActivity implements View.OnCli
 
             //正在观看画面信息通知
             case CustomBroadcastConstants.GET_SVC_WATCH_INFO:
+                LogUtil.d(UIConstants.DEMO_TAG, "CustomBroadcastConstants.GET_SVC_WATCH_INFO-->" + obj);
+
                 TsdkConfSvcWatchInfo svcWatchInfo = (TsdkConfSvcWatchInfo) obj;
                 if (svcWatchInfo.getWatchAttendeeNum() <= 0 || svcLabel.size() <= 0) {
                     return;
@@ -907,6 +991,9 @@ public class VideoConfGridActivity extends BaseLibActivity implements View.OnCli
             public void run() {
                 //添加成员按钮
                 ivAddMember.setVisibility(isChairMan() ? View.VISIBLE : View.GONE);
+
+                //静音会议按钮
+                ivMuteConf.setVisibility(isChairMan() ? View.VISIBLE : View.GONE);
 
                 //静音会议
                 ivMuteConf.setImageResource(currentConfBaseInfo.isMuteAll() ? R.mipmap.ic_close_all_mic : R.mipmap.ic_open_all_mic);
@@ -1065,20 +1152,6 @@ public class VideoConfGridActivity extends BaseLibActivity implements View.OnCli
             ivSwitchCamera.getDrawable().setAlpha(NOT_ALPHA);
         }
     }
-
-//    创建会议              --》可以
-//    呼叫/挂断终端            --》可以
-//    麦克风闭音/不闭音      --》可以
-//    扬声器静音/不静音      --》听筒和扬声器切换
-//    添加会场              --》
-//    移除会场
-//    申请主席              --》可以
-//    释放主席              --》可以
-//    广播                  --》可以
-//    取消广播
-//    辅流（移动端仅接收）
-//    延长会议
-//    结束会议
 
     /**
      * 添加与会者
@@ -1427,14 +1500,46 @@ public class VideoConfGridActivity extends BaseLibActivity implements View.OnCli
     /************************显示远端画面-start***********************/
     public void refreshWatchMemberPage() {
         LogUtil.d(UIConstants.DEMO_TAG, "refreshWatchMemberPage");
+        //当前页数
         final int currentPage = MeetingMgr.getInstance().getCurrentWatchPage();
+        //总页数
         final int totalPage = MeetingMgr.getInstance().getTotalWatchablePage();
+        //观看的总数量
         final int watchSum = MeetingMgr.getInstance().getWatchSum();
+
+        LogUtil.d(TAG, "currentPage->" + currentPage + ", totalPage->" + totalPage + ", watchSum->" + watchSum);
 
         if (0 == watchSum) {
             isOnlyLocal = true;
         } else {
             isOnlyLocal = false;
+        }
+
+        if (watchSum > 0) {
+            //判断观看的数量是否可以被3整除
+            int mo = watchSum % 3;
+
+            //当前viewpager的总页数
+            int totalPageNumber = 0;
+
+            //如果不能整除
+            if (mo != 0) {
+                totalPageNumber = watchSum / 3 + 1;
+            }
+
+            //需要添加的页数，应总页数-当前pager总页数
+            int addNumber = (totalPageNumber + 1) - pagerAdapter.getCount();
+
+            if (addNumber < 0) {
+                for (int i = pagerAdapter.getCount(); i > Math.abs(addNumber); i--) {
+                    deletePage();
+                }
+            }else if(addNumber>0) {
+                for (int i = 0; i < addNumber; i++) {
+                    addPage();
+                }
+            }
+
         }
 
         //更新本地画面
@@ -1485,100 +1590,100 @@ public class VideoConfGridActivity extends BaseLibActivity implements View.OnCli
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                switch (sum) {
-                    case 0:
-                        getLocalVideoView().setVisibility(View.GONE);
-                        getRemoteSmallVideoView_01().setVisibility(View.GONE);
-                        getRemoteSmallVideoView_02().setVisibility(View.GONE);
-                        getRemoteSmallVideoView_03().setVisibility(View.GONE);
-
-                        mConfSmallVideoWndLL.setVisibility(View.GONE);
-                        mConfLocalVideoLayout.setVisibility(View.GONE);
-                        mConfRemoteSmallVideoLayout_01.setVisibility(View.GONE);
-                        mConfRemoteSmallVideoLayout_02.setVisibility(View.GONE);
-                        mConfRemoteSmallVideoLayout_03.setVisibility(View.GONE);
-
-                        mConfLocalVideoText.setVisibility(View.GONE);
-                        mConfRemoteSmallVideoText_01.setVisibility(View.GONE);
-                        mConfRemoteSmallVideoText_02.setVisibility(View.GONE);
-                        mConfRemoteSmallVideoText_03.setVisibility(View.GONE);
-                        break;
-
-                    case 1:
-                        getLocalVideoView().setVisibility(View.VISIBLE);
-                        getRemoteSmallVideoView_01().setVisibility(View.GONE);
-                        getRemoteSmallVideoView_02().setVisibility(View.GONE);
-                        getRemoteSmallVideoView_03().setVisibility(View.GONE);
-
-                        mConfSmallVideoWndLL.setVisibility(View.GONE);
-                        mConfLocalVideoLayout.setVisibility(View.GONE);
-                        mConfRemoteSmallVideoLayout_01.setVisibility(View.GONE);
-                        mConfRemoteSmallVideoLayout_02.setVisibility(View.GONE);
-                        mConfRemoteSmallVideoLayout_03.setVisibility(View.GONE);
-
-                        mConfLocalVideoText.setVisibility(View.GONE);
-                        mConfRemoteSmallVideoText_01.setVisibility(View.GONE);
-                        mConfRemoteSmallVideoText_02.setVisibility(View.GONE);
-                        mConfRemoteSmallVideoText_03.setVisibility(View.GONE);
-                        break;
-
-                    case 2:
-                        getLocalVideoView().setVisibility(View.VISIBLE);
-                        getRemoteSmallVideoView_01().setVisibility(View.VISIBLE);
-                        getRemoteSmallVideoView_02().setVisibility(View.GONE);
-                        getRemoteSmallVideoView_03().setVisibility(View.GONE);
-
-                        mConfSmallVideoWndLL.setVisibility(View.VISIBLE);
-                        mConfLocalVideoLayout.setVisibility(View.VISIBLE);
-                        mConfRemoteSmallVideoLayout_01.setVisibility(View.VISIBLE);
-                        mConfRemoteSmallVideoLayout_02.setVisibility(View.GONE);
-                        mConfRemoteSmallVideoLayout_03.setVisibility(View.GONE);
-
-                        mConfLocalVideoText.setVisibility(View.VISIBLE);
-                        mConfRemoteSmallVideoText_01.setVisibility(View.VISIBLE);
-                        mConfRemoteSmallVideoText_02.setVisibility(View.GONE);
-                        mConfRemoteSmallVideoText_03.setVisibility(View.GONE);
-                        break;
-
-                    case 3:
-                        getLocalVideoView().setVisibility(View.VISIBLE);
-                        getRemoteSmallVideoView_01().setVisibility(View.VISIBLE);
-                        getRemoteSmallVideoView_02().setVisibility(View.VISIBLE);
-                        getRemoteSmallVideoView_03().setVisibility(View.GONE);
-
-                        mConfSmallVideoWndLL.setVisibility(View.VISIBLE);
-                        mConfLocalVideoLayout.setVisibility(View.VISIBLE);
-                        mConfRemoteSmallVideoLayout_01.setVisibility(View.VISIBLE);
-                        mConfRemoteSmallVideoLayout_02.setVisibility(View.VISIBLE);
-                        mConfRemoteSmallVideoLayout_03.setVisibility(View.GONE);
-
-                        mConfLocalVideoText.setVisibility(View.VISIBLE);
-                        mConfRemoteSmallVideoText_01.setVisibility(View.VISIBLE);
-                        mConfRemoteSmallVideoText_02.setVisibility(View.VISIBLE);
-                        mConfRemoteSmallVideoText_03.setVisibility(View.GONE);
-                        break;
-
-                    case 4:
-                        getLocalVideoView().setVisibility(View.VISIBLE);
-                        getRemoteSmallVideoView_01().setVisibility(View.VISIBLE);
-                        getRemoteSmallVideoView_02().setVisibility(View.VISIBLE);
-                        getRemoteSmallVideoView_03().setVisibility(View.VISIBLE);
-
-                        mConfSmallVideoWndLL.setVisibility(View.VISIBLE);
-                        mConfLocalVideoLayout.setVisibility(View.VISIBLE);
-                        mConfRemoteSmallVideoLayout_01.setVisibility(View.VISIBLE);
-                        mConfRemoteSmallVideoLayout_02.setVisibility(View.VISIBLE);
-                        mConfRemoteSmallVideoLayout_03.setVisibility(View.VISIBLE);
-
-                        mConfLocalVideoText.setVisibility(View.VISIBLE);
-                        mConfRemoteSmallVideoText_01.setVisibility(View.VISIBLE);
-                        mConfRemoteSmallVideoText_02.setVisibility(View.VISIBLE);
-                        mConfRemoteSmallVideoText_03.setVisibility(View.VISIBLE);
-                        break;
-
-                    default:
-                        break;
-                }
+//                switch (sum) {
+//                    case 0:
+//                        getLocalVideoView().setVisibility(View.GONE);
+//                        getRemoteSmallVideoView_01().setVisibility(View.GONE);
+//                        getRemoteSmallVideoView_02().setVisibility(View.GONE);
+//                        getRemoteSmallVideoView_03().setVisibility(View.GONE);
+//
+//                        mConfSmallVideoWndLL.setVisibility(View.GONE);
+//                        mConfLocalVideoLayout.setVisibility(View.GONE);
+//                        mConfRemoteSmallVideoLayout_01.setVisibility(View.GONE);
+//                        mConfRemoteSmallVideoLayout_02.setVisibility(View.GONE);
+//                        mConfRemoteSmallVideoLayout_03.setVisibility(View.GONE);
+//
+//                        mConfLocalVideoText.setVisibility(View.GONE);
+//                        mConfRemoteSmallVideoText_01.setVisibility(View.GONE);
+//                        mConfRemoteSmallVideoText_02.setVisibility(View.GONE);
+//                        mConfRemoteSmallVideoText_03.setVisibility(View.GONE);
+//                        break;
+//
+//                    case 1:
+//                        getLocalVideoView().setVisibility(View.VISIBLE);
+//                        getRemoteSmallVideoView_01().setVisibility(View.GONE);
+//                        getRemoteSmallVideoView_02().setVisibility(View.GONE);
+//                        getRemoteSmallVideoView_03().setVisibility(View.GONE);
+//
+//                        mConfSmallVideoWndLL.setVisibility(View.GONE);
+//                        mConfLocalVideoLayout.setVisibility(View.GONE);
+//                        mConfRemoteSmallVideoLayout_01.setVisibility(View.GONE);
+//                        mConfRemoteSmallVideoLayout_02.setVisibility(View.GONE);
+//                        mConfRemoteSmallVideoLayout_03.setVisibility(View.GONE);
+//
+//                        mConfLocalVideoText.setVisibility(View.GONE);
+//                        mConfRemoteSmallVideoText_01.setVisibility(View.GONE);
+//                        mConfRemoteSmallVideoText_02.setVisibility(View.GONE);
+//                        mConfRemoteSmallVideoText_03.setVisibility(View.GONE);
+//                        break;
+//
+//                    case 2:
+//                        getLocalVideoView().setVisibility(View.VISIBLE);
+//                        getRemoteSmallVideoView_01().setVisibility(View.VISIBLE);
+//                        getRemoteSmallVideoView_02().setVisibility(View.GONE);
+//                        getRemoteSmallVideoView_03().setVisibility(View.GONE);
+//
+//                        mConfSmallVideoWndLL.setVisibility(View.VISIBLE);
+//                        mConfLocalVideoLayout.setVisibility(View.VISIBLE);
+//                        mConfRemoteSmallVideoLayout_01.setVisibility(View.VISIBLE);
+//                        mConfRemoteSmallVideoLayout_02.setVisibility(View.GONE);
+//                        mConfRemoteSmallVideoLayout_03.setVisibility(View.GONE);
+//
+//                        mConfLocalVideoText.setVisibility(View.VISIBLE);
+//                        mConfRemoteSmallVideoText_01.setVisibility(View.VISIBLE);
+//                        mConfRemoteSmallVideoText_02.setVisibility(View.GONE);
+//                        mConfRemoteSmallVideoText_03.setVisibility(View.GONE);
+//                        break;
+//
+//                    case 3:
+//                        getLocalVideoView().setVisibility(View.VISIBLE);
+//                        getRemoteSmallVideoView_01().setVisibility(View.VISIBLE);
+//                        getRemoteSmallVideoView_02().setVisibility(View.VISIBLE);
+//                        getRemoteSmallVideoView_03().setVisibility(View.GONE);
+//
+//                        mConfSmallVideoWndLL.setVisibility(View.VISIBLE);
+//                        mConfLocalVideoLayout.setVisibility(View.VISIBLE);
+//                        mConfRemoteSmallVideoLayout_01.setVisibility(View.VISIBLE);
+//                        mConfRemoteSmallVideoLayout_02.setVisibility(View.VISIBLE);
+//                        mConfRemoteSmallVideoLayout_03.setVisibility(View.GONE);
+//
+//                        mConfLocalVideoText.setVisibility(View.VISIBLE);
+//                        mConfRemoteSmallVideoText_01.setVisibility(View.VISIBLE);
+//                        mConfRemoteSmallVideoText_02.setVisibility(View.VISIBLE);
+//                        mConfRemoteSmallVideoText_03.setVisibility(View.GONE);
+//                        break;
+//
+//                    case 4:
+//                        getLocalVideoView().setVisibility(View.VISIBLE);
+//                        getRemoteSmallVideoView_01().setVisibility(View.VISIBLE);
+//                        getRemoteSmallVideoView_02().setVisibility(View.VISIBLE);
+//                        getRemoteSmallVideoView_03().setVisibility(View.VISIBLE);
+//
+//                        mConfSmallVideoWndLL.setVisibility(View.VISIBLE);
+//                        mConfLocalVideoLayout.setVisibility(View.VISIBLE);
+//                        mConfRemoteSmallVideoLayout_01.setVisibility(View.VISIBLE);
+//                        mConfRemoteSmallVideoLayout_02.setVisibility(View.VISIBLE);
+//                        mConfRemoteSmallVideoLayout_03.setVisibility(View.VISIBLE);
+//
+//                        mConfLocalVideoText.setVisibility(View.VISIBLE);
+//                        mConfRemoteSmallVideoText_01.setVisibility(View.VISIBLE);
+//                        mConfRemoteSmallVideoText_02.setVisibility(View.VISIBLE);
+//                        mConfRemoteSmallVideoText_03.setVisibility(View.VISIBLE);
+//                        break;
+//
+//                    default:
+//                        break;
+//                }
             }
         });
     }
@@ -1764,31 +1869,6 @@ public class VideoConfGridActivity extends BaseLibActivity implements View.OnCli
     }
 
     /**
-     * 只有本地画面时，大画面显示本地画面
-     *
-     * @param context
-     * @param bigLayout
-     * @param hideLayout
-     */
-    public void setOnlyLocalVideoContainer(Context context,
-                                           ViewGroup bigLayout,
-                                           ViewGroup hideLayout) {
-
-        LogUtil.d(UIConstants.DEMO_TAG, "setOnlyLocalVideoContainer");
-
-        //隐藏本地小画面
-        mLocalView.setVisibility(View.GONE);
-
-        if (bigLayout != null) {
-            addSurfaceView(bigLayout, getLocalVideoView());
-        }
-
-        if (hideLayout != null) {
-            addSurfaceView(hideLayout, getHideVideoView());
-        }
-    }
-
-    /**
      * 设置单流画面时的画面显示
      */
     private void setAvcVideoContainer(
@@ -1804,6 +1884,41 @@ public class VideoConfGridActivity extends BaseLibActivity implements View.OnCli
         addSurfaceView(bigLayout, getRemoteBigVideoView());
         addSurfaceView(hideLayout, getHideVideoView());
     }
+
+
+    /**
+     * 只有本地画面时，大画面显示本地画面
+     *
+     * @param context
+     * @param bigLayout
+     * @param hideLayout
+     */
+    public void setOnlyLocalVideoContainer(Context context,
+                                           ViewGroup bigLayout,
+                                           ViewGroup hideLayout) {
+        LogUtil.d(UIConstants.DEMO_TAG, "只有本地画面时-->setOnlyLocalVideoContainer");
+
+        //隐藏本地小画面
+        mLocalView.setVisibility(View.GONE);
+
+        if (bigLayout != null) {
+//            addSurfaceView(bigLayout, getLocalVideoView());
+        }
+
+        ToastHelper.showShort("只有本地画面时-->setOnlyLocalVideo");
+
+        //移除fragment
+        for (int i = 1; i < pagerAdapter.getCount(); i++) {
+            deletePage(i);
+        }
+
+        LocBroadcast.getInstance().sendBroadcast(CustomBroadcastConstants.REFRESH_REMOTE_VIEW, false);
+
+        if (hideLayout != null) {
+            addSurfaceView(hideLayout, getHideVideoView());
+        }
+    }
+
 
     /**
      * 设置多流会议画面
@@ -1824,17 +1939,22 @@ public class VideoConfGridActivity extends BaseLibActivity implements View.OnCli
                                          FrameLayout mConfRemoteSmallVideoLayout_01,
                                          FrameLayout mConfRemoteSmallVideoLayout_02,
                                          FrameLayout mConfRemoteSmallVideoLayout_03) {
-
-        LogUtil.d(UIConstants.DEMO_TAG, "setSvcAllVideoContainer");
+        LogUtil.d(UIConstants.DEMO_TAG, "设置多流会议画面->setSvcAllVideoContainer");
 
         mLocalView.setVisibility(View.GONE);
+
+        ToastHelper.showShort("设置多流会议画面-->setSvcAllVideoContainer");
+
+        LocBroadcast.getInstance().sendBroadcast(CustomBroadcastConstants.REFRESH_REMOTE_VIEW, true);
+
+        LocBroadcast.getInstance().sendBroadcast(CustomBroadcastConstants.REFRESH_SMALL_VIEW, vpContent.getCurrentItem());
 
         if (smallLayout != null) {
             addSurfaceView(smallLayout, getLocalVideoView());
         }
 
         if (mRemoteView != null) {
-            addSurfaceView(mRemoteView, getRemoteBigVideoView());
+//            addSurfaceView(mRemoteView, getRemoteBigVideoView());
         }
 
         if (mConfRemoteSmallVideoLayout_01 != null) {
@@ -1863,6 +1983,7 @@ public class VideoConfGridActivity extends BaseLibActivity implements View.OnCli
         // 获取屏幕的宽和高
         int px = DensityUtil.dip2px(40.0f);
         int mScreenWidth = DensityUtil.getScreenHeight(this) - px;
+        int mScreenHeight = DensityUtil.getScreenHeight(this) - px;
         if (isVertical) {
             mConfVideoBackIV.setRotation(0);
             mConfVideoForwardIV.setRotation(0);
@@ -1877,15 +1998,56 @@ public class VideoConfGridActivity extends BaseLibActivity implements View.OnCli
         } else {
             mConfVideoBackIV.setRotation(90);
             mConfVideoForwardIV.setRotation(90);
-            mConfLocalVideoLayout.getLayoutParams().width = (int) (mScreenWidth / 4 * (16.0 / 9.0));
-            mConfLocalVideoLayout.getLayoutParams().height = mScreenWidth / 4;
-            mConfRemoteSmallVideoLayout_01.getLayoutParams().width = (int) (mScreenWidth / 4 * (16.0 / 9.0));
-            mConfRemoteSmallVideoLayout_01.getLayoutParams().height = mScreenWidth / 4;
-            mConfRemoteSmallVideoLayout_02.getLayoutParams().width = (int) (mScreenWidth / 4 * (16.0 / 9.0));
-            mConfRemoteSmallVideoLayout_02.getLayoutParams().height = mScreenWidth / 4;
-            mConfRemoteSmallVideoLayout_03.getLayoutParams().width = (int) (mScreenWidth / 4 * (16.0 / 9.0));
-            mConfRemoteSmallVideoLayout_03.getLayoutParams().height = mScreenWidth / 4;
+            mConfLocalVideoLayout.getLayoutParams().width = (int) (mScreenWidth / 2 * (16.0 / 9.0));
+            mConfLocalVideoLayout.getLayoutParams().height = mScreenWidth / 2;
+
+            mConfRemoteSmallVideoLayout_01.getLayoutParams().width = (int) (mScreenWidth / 2 * (16.0 / 9.0));
+            mConfRemoteSmallVideoLayout_01.getLayoutParams().height = mScreenWidth / 2;
+            mConfRemoteSmallVideoLayout_02.getLayoutParams().width = (int) (mScreenWidth / 2 * (16.0 / 9.0));
+            mConfRemoteSmallVideoLayout_02.getLayoutParams().height = mScreenWidth / 2;
+            mConfRemoteSmallVideoLayout_03.getLayoutParams().width = (int) (mScreenWidth / 2 * (16.0 / 9.0));
+            mConfRemoteSmallVideoLayout_03.getLayoutParams().height = mScreenWidth / 2;
         }
+    }
+
+    /**
+     * 删除fragment
+     *
+     */
+    private void deletePage() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                pagerAdapter.delPage();
+            }
+        });
+    }
+
+    /**
+     * 删除fragment
+     *
+     * @param index
+     */
+    private void deletePage(final int index) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                pagerAdapter.delPage(index);
+            }
+        });
+
+    }
+
+    /**
+     * 添加view
+     */
+    private void addPage() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                pagerAdapter.addPage(ConfViewFragment.newInstance(1));
+            }
+        });
     }
 
     /************************显示远端画面-end***********************/

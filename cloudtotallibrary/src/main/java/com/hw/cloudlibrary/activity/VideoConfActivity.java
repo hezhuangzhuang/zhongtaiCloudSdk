@@ -61,7 +61,6 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static com.huawei.ecterminalsdk.base.TsdkConfRole.TSDK_E_CONF_ROLE_CHAIRMAN;
 
 /**
@@ -703,7 +702,6 @@ public class VideoConfActivity extends BaseLibActivity implements View.OnClickLi
                 }
 
                 for (final Member member : memberList) {
-                    LogUtil.d(UIConstants.DEMO_TAG, member.toString());
                     if (member.isSelf()) {
                         postRunOnUiThread(new Runnable() {
                             @Override

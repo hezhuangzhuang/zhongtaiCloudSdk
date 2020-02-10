@@ -1,6 +1,5 @@
 package com.hw.cloudlibrary.activity;
 
-import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -30,7 +29,7 @@ public class CallerIDActivity extends BaseMediaActivity implements View.OnClickL
 
         //是否移动端创建会议填false
 //        PreferencesHelper.saveData(UIConstants.IS_CREATE, false);
-        SPStaticUtils.put(UIConstants.IS_CREATE,false);
+        SPStaticUtils.put(UIConstants.IS_CREATE, false);
     }
 
     @Override
@@ -38,7 +37,7 @@ public class CallerIDActivity extends BaseMediaActivity implements View.OnClickL
         tvHangUp.setOnClickListener(this);
         tvAnswer.setOnClickListener(this);
 
-        tvNumber.setText(TextUtils.isEmpty(String.valueOf(mCallNumber)) ? "" : String.valueOf(mCallNumber));
+        tvNumber.setText(mDisplayName);
     }
 
     @Override

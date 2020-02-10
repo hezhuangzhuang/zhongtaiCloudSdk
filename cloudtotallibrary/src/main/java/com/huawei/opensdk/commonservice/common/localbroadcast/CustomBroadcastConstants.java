@@ -145,4 +145,10 @@ public interface CustomBroadcastConstants
 
     //conference to call
     String CONF_INCOMING_TO_CALL_INCOMING = "com.huawei.opensdk.conf.conftocall";
+
+    //刷新远端大画面
+    String REFRESH_REMOTE_VIEW = "REFRESH_REMOTE_VIEW";
+
+    //刷新远端小画面
+    String REFRESH_SMALL_VIEW = "REFRESH_SMALL_VIEW";
 }

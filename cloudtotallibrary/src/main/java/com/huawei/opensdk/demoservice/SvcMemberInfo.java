@@ -80,17 +80,16 @@ public class SvcMemberInfo {
         this.totalWatchablePage = totalWatchablePage;
     }
 
-    public int getCurrentWatchSmallCount(){
+    public int getCurrentWatchSmallCount() {
 
         if (beWatchMemberList.size() > 0) {
             return beWatchMemberList.size() - 1;
-        }else{
+        } else {
             return 0;
         }
     }
 
     public boolean svcMemberListUpdateHandle(List<Member> members) {
-
         LogUtil.i(TAG, "svcMemberListUpdateHandle() enter");
 
         if (!watchableMemberList.isEmpty()) {
@@ -106,8 +105,7 @@ public class SvcMemberInfo {
                 continue;
             }
 
-            if (!member.isVideo())
-            {
+            if (!member.isVideo()) {
                 continue;
             }
 
@@ -115,8 +113,7 @@ public class SvcMemberInfo {
         }
 
         int watchableCount = watchableMemberList.size();
-        if (watchableCount > 0)
-        {
+        if (watchableCount > 0) {
             int currentWatchPage = this.currentWatchPage;
             int totalWatchablePage = this.totalWatchablePage;
 
@@ -127,19 +124,16 @@ public class SvcMemberInfo {
                     break;
                 }
             }
-            if (watchableCount % MAX_SMALL_WIND_NUM == 0)
-            {
+            if (watchableCount % MAX_SMALL_WIND_NUM == 0) {
                 this.totalWatchablePage = watchableCount / MAX_SMALL_WIND_NUM;
-            }
-            else {
+            } else {
                 this.totalWatchablePage = watchableCount / MAX_SMALL_WIND_NUM + 1;
             }
 
 
             //更新当前可选看的小窗口数
             int maxSmallWatchCount = MAX_SMALL_WIND_NUM;
-            if (this.totalWatchablePage == 1)
-            {
+            if (this.totalWatchablePage == 1) {
                 if (watchableCount <= MAX_SMALL_WIND_NUM) {
                     maxSmallWatchCount = watchableCount;
                 }
@@ -152,7 +146,7 @@ public class SvcMemberInfo {
             }
 
             boolean needRewatch = updateBeWatchMemberList(maxSmallWatchCount, false);
-            if (needRewatch){
+            if (needRewatch) {
                 return true;
             }
 
@@ -161,9 +155,7 @@ public class SvcMemberInfo {
             }
 
             return false;
-        }
-        else
-        {
+        } else {
             beWatchMemberList.clear();
             currentWatchMemberList.clear();
 
@@ -176,7 +168,6 @@ public class SvcMemberInfo {
 
 
     public boolean updateBeWatchMemberList(int needSmallWatchCount, boolean forceUpdateSmallWnd) {
-
         LogUtil.i(TAG, "updateBeWatchMemberList() enter, needSmallWatchCount->" + needSmallWatchCount);
 
         TsdkWatchAttendees tempWatch;
@@ -199,14 +190,14 @@ public class SvcMemberInfo {
 
         // 大画面被指定过
         if (!tempWatch.getNumber().isEmpty() && !tempWatch.getNumber().equals("")) {
-            Member tempMember =  getMemberByNumber(tempWatch.getNumber());
+            Member tempMember = getMemberByNumber(tempWatch.getNumber());
             if (tempMember == null) {
                 tempWatch.setNumber("");
                 update_big_wnd = true;
             }
         }
 
-        if (forceUpdateSmallWnd){
+        if (forceUpdateSmallWnd) {
             update_small_wnd = true;
         } else if (needSmallWatchCount != beWatchMemberList.size() - 1) {
             update_small_wnd = true;
@@ -227,7 +218,7 @@ public class SvcMemberInfo {
         }
 
 
-        int startIndex= 0;
+        int startIndex = 0;
         if (update_small_wnd) {
 
             TsdkWatchAttendees backupBigWatch = new TsdkWatchAttendees();
@@ -244,7 +235,7 @@ public class SvcMemberInfo {
             startIndex = (currentWatchPage - 1) * MAX_SMALL_WIND_NUM;
             for (loop = 0; loop < needSmallWatchCount; loop++) {
                 tempWatch = new TsdkWatchAttendees();
-                tempWatch.setLabel(svcLabel.get(loop+1));
+                tempWatch.setLabel(svcLabel.get(loop + 1));
                 tempWatch.setWidth(160);
                 tempWatch.setHeight(90);
                 Member tempMember = watchableMemberList.get(startIndex++);
@@ -261,8 +252,7 @@ public class SvcMemberInfo {
     }
 
     public boolean setBeWatchMemberList(int beWatchPage) {
-
-        LogUtil.i(TAG, "setBeWatchMemberList() enter, beWatchPage->" + beWatchPage);
+        LogUtil.i(TAG, "setBeWatchMemberList() enter, beWatchPage->" + beWatchPage + ",this.currentWatchPage->" + this.currentWatchPage);
 
         boolean forceUpdateSmallWnd = false;
         int lastWatchPage = this.currentWatchPage;
@@ -276,11 +266,11 @@ public class SvcMemberInfo {
         }
 
         if (lastWatchPage != this.currentWatchPage) {
-
             forceUpdateSmallWnd = true;
         }
 
         int watchableCount = watchableMemberList.size();
+
         int maxSmallWatchCount = MAX_SMALL_WIND_NUM;
         if (this.totalWatchablePage == 1) {
             if (watchableCount < MAX_SMALL_WIND_NUM) {
@@ -293,8 +283,9 @@ public class SvcMemberInfo {
                 maxSmallWatchCount = watchableCount - (this.currentWatchPage - 1) * MAX_SMALL_WIND_NUM;
             }
         }
-
+        LogUtil.d(TAG, "watchableCount->" + watchableCount + ",totalWatchablePage->" + totalWatchablePage + ",maxSmallWatchCount->" + maxSmallWatchCount);
         boolean needReWatch = updateBeWatchMemberList(maxSmallWatchCount, forceUpdateSmallWnd);
+
         if (needReWatch) {
             return true;
         }

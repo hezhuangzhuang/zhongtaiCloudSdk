@@ -199,7 +199,7 @@ public class ConvokeActivity extends BaseLibActivity implements View.OnClickList
             if (CustomBroadcastConstants.GET_CONF_DETAIL_RESULT.equals(broadcastName)) {
                 if (obj instanceof ConfDetailInfo) {
                     ConfDetailInfo confDetailInfo = (ConfDetailInfo) obj;
-                    LogUtil.d(confDetailInfo.toString());
+                    LogUtil.d("ConvokeActivity", confDetailInfo.toString());
                     //加入会议
                     HuaweiCallImp.getInstance().joinConf(
                             confDetailInfo.getConfID(),

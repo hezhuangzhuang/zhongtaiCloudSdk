@@ -136,6 +136,7 @@ public class HuaweiCallImp {
         TsdkBookConfInfo bookConfInfo = new TsdkBookConfInfo();
         //是否为及时会议
         boolean isInstantConference = true;
+
         //及时会议
         if (isInstantConference) {
             bookConfInfo.setConfType(TsdkConfType.TSDK_E_CONF_INSTANT);
@@ -156,7 +157,7 @@ public class HuaweiCallImp {
         bookConfInfo.setIsAutoRecord(0);
         bookConfInfo.setRecordMode(TsdkConfRecordMode.TSDK_E_CONF_RECORD_DISABLE);
 
-        //TODO：创建参会人员列表
+        //创建参会人员列表
         List<Member> members = getMembers(memberNumbers);
 
         List<TsdkAttendeeBaseInfo> attendeeList = ConfConvertUtil.memberListToAttendeeList(members);
@@ -223,22 +224,21 @@ public class HuaweiCallImp {
      * @param accessCode
      */
     public long joinConf(String accessCode) {
-//        String state = "";
-//        try {
-//            state = PreferencesHelper.getData(UIConstants.REGISTER_RESULT_TEMP);
-//        } catch (Exception e) {
-//        }
-
-//        Toast.makeText(LocContext.getContext(), "state:" + state, Toast.LENGTH_SHORT).show();
-//        if ("4".equals(state) || "0".equals(state) || "2".equals(state)) {
-
         //加入会议
         SPStaticUtils.put(UIConstants.JOIN_CONF, true);
-//        PreferencesHelper.saveData(UIConstants.JOIN_CONF, true);
         return CallMgr.getInstance().startCall(accessCode, true);
     }
 
-    public long joinConf(String confId, String confPwd, String accessNumber) {
+    /**
+     * 加入会议
+     * @param confId            会议id
+     * @param confPwd           会议密码
+     * @param accessNumber      会议接入码
+     * @return
+     */
+    public long joinConf(String confId,
+                         String confPwd,
+                         String accessNumber) {
         TsdkConfJoinParam confJoinParam = new TsdkConfJoinParam();
         confJoinParam.setConfId(confId);
         confJoinParam.setConfPassword(confPwd);

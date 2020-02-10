@@ -1,13 +1,8 @@
 package com.hw.cloudlibrary.activity;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Toast;
@@ -24,7 +19,6 @@ import com.hw.cloudlibrary.ecsdk.common.UIConstants;
 import com.hw.cloudlibrary.ecsdk.login.CallFunc;
 import com.hw.cloudlibrary.ecsdk.utils.ActivityUtil;
 import com.hw.cloudlibrary.utils.StatusBarUtils;
-import com.hw.cloudlibrary.utils.ToastHelper;
 import com.hw.cloudlibrary.utils.sharedpreferences.SPStaticUtils;
 
 import java.util.Timer;

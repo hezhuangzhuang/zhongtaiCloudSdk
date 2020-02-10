@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.huawei.ecterminalsdk.models.call.TsdkCall;

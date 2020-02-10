@@ -48,6 +48,8 @@ public class CustomDialog extends BaseDialog {
 
         switch (controlType) {
             case 0:
+                title.setText("主席密码");
+                etAccessCode.setHint("请输入主席密码");
                 break;
 
             //释放主席
