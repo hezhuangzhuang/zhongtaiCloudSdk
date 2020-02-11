@@ -49,14 +49,20 @@ public class MyPagerAdapter extends FragmentPagerAdapter {
     }
 
     public void delPage(int index) {
+        if (index == 0) {
+            return;
+        }
         mFragmentList.remove(index);
         mItemIdList.remove(index);
         notifyDataSetChanged();
     }
 
     public void delPage() {
-        mFragmentList.remove(mFragmentList.size()-1);
-        mItemIdList.remove(mFragmentList.size()-1);
+        if (mFragmentList.size() - 1 == 0) {
+            return;
+        }
+        mFragmentList.remove(mFragmentList.size() - 1);
+        mItemIdList.remove(mFragmentList.size() - 1);
         notifyDataSetChanged();
     }
 

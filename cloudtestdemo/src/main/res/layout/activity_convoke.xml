@@ -147,7 +147,7 @@
                 android:paddingLeft="12dp"
                 android:paddingTop="12dp"
                 android:paddingRight="12dp"
-                android:text="009911181159298,00991116947961,00991116969741,00991116974337"
+                android:text="00991116947961,00991116969741,00991116974337"
                 android:paddingBottom="12dp"
                 android:textColor="@color/color_333" />
 

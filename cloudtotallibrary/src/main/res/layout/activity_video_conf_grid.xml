@@ -98,71 +98,71 @@
                 android:textSize="@dimen/dp10" />
         </FrameLayout>
 
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/shape_conf_video">
+<!--        <FrameLayout-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:background="@drawable/shape_conf_video">-->
 
-            <FrameLayout
-                android:id="@+id/conf_remote_small_video_layout_01"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+<!--            <FrameLayout-->
+<!--                android:id="@+id/conf_remote_small_video_layout_01"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent" />-->
 
-            <TextView
-                android:id="@+id/conf_remote_small_video_text_01"
-                android:layout_width="60dp"
-                android:layout_height="wrap_content"
-                android:background="@color/text_black"
-                android:ellipsize="middle"
-                android:gravity="center"
-                android:singleLine="true"
-                android:textColor="@color/white"
-                android:textSize="@dimen/dp10" />
-        </FrameLayout>
+<!--            <TextView-->
+<!--                android:id="@+id/conf_remote_small_video_text_01"-->
+<!--                android:layout_width="60dp"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:background="@color/text_black"-->
+<!--                android:ellipsize="middle"-->
+<!--                android:gravity="center"-->
+<!--                android:singleLine="true"-->
+<!--                android:textColor="@color/white"-->
+<!--                android:textSize="@dimen/dp10" />-->
+<!--        </FrameLayout>-->
 
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/shape_conf_video">
+<!--        <FrameLayout-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:background="@drawable/shape_conf_video">-->
 
-            <FrameLayout
-                android:id="@+id/conf_remote_small_video_layout_02"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+<!--            <FrameLayout-->
+<!--                android:id="@+id/conf_remote_small_video_layout_02"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent" />-->
 
-            <TextView
-                android:id="@+id/conf_remote_small_video_text_02"
-                android:layout_width="60dp"
-                android:layout_height="wrap_content"
-                android:background="@color/text_black"
-                android:ellipsize="middle"
-                android:gravity="center"
-                android:singleLine="true"
-                android:textColor="@color/white"
-                android:textSize="@dimen/dp10" />
-        </FrameLayout>
+<!--            <TextView-->
+<!--                android:id="@+id/conf_remote_small_video_text_02"-->
+<!--                android:layout_width="60dp"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:background="@color/text_black"-->
+<!--                android:ellipsize="middle"-->
+<!--                android:gravity="center"-->
+<!--                android:singleLine="true"-->
+<!--                android:textColor="@color/white"-->
+<!--                android:textSize="@dimen/dp10" />-->
+<!--        </FrameLayout>-->
 
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/shape_conf_video">
+<!--        <FrameLayout-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:background="@drawable/shape_conf_video">-->
 
-            <FrameLayout
-                android:id="@+id/conf_remote_small_video_layout_03"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+<!--            <FrameLayout-->
+<!--                android:id="@+id/conf_remote_small_video_layout_03"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent" />-->
 
-            <TextView
-                android:id="@+id/conf_remote_small_video_text_03"
-                android:layout_width="60dp"
-                android:layout_height="wrap_content"
-                android:background="@color/text_black"
-                android:ellipsize="middle"
-                android:gravity="center"
-                android:singleLine="true"
-                android:textColor="@color/white"
-                android:textSize="@dimen/dp10" />
-        </FrameLayout>
+<!--            <TextView-->
+<!--                android:id="@+id/conf_remote_small_video_text_03"-->
+<!--                android:layout_width="60dp"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:background="@color/text_black"-->
+<!--                android:ellipsize="middle"-->
+<!--                android:gravity="center"-->
+<!--                android:singleLine="true"-->
+<!--                android:textColor="@color/white"-->
+<!--                android:textSize="@dimen/dp10" />-->
+<!--        </FrameLayout>-->
 
         <ImageView
             android:id="@+id/watch_next_page"

@@ -1,12 +1,8 @@
 package com.hw.cloudlibrary.fragment;
 
-import android.content.Context;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.SurfaceView;
 import android.view.View;
@@ -19,6 +15,8 @@ import com.huawei.opensdk.commonservice.common.localbroadcast.LocBroadcastReceiv
 import com.huawei.opensdk.commonservice.common.util.LogUtil;
 import com.huawei.opensdk.demoservice.MeetingMgr;
 import com.hw.cloudlibrary.R;
+import com.hw.cloudlibrary.utils.DensityUtil;
+import com.hw.cloudlibrary.utils.ToastHelper;
 import com.hw.cloudlibrary.widget.freesizedraggablelayout.DetailView;
 import com.hw.cloudlibrary.widget.freesizedraggablelayout.FreeSizeDraggableLayout;
 
@@ -28,7 +26,7 @@ import java.util.List;
 /**
  * 显示会议列表的界面
  */
-public class ConfViewFragment extends Fragment {
+public class ConfViewFragment extends BaseLazyFragment {
     public static final String TAG = "ConfViewFragment";
     //下标
     private int index;
@@ -41,7 +39,10 @@ public class ConfViewFragment extends Fragment {
 
     private List<DetailView> detailViews = new ArrayList<>();
 
-    private String[] broadcastNames = new String[]{CustomBroadcastConstants.REFRESH_SMALL_VIEW};
+    private String[] broadcastNames = new String[]{
+            CustomBroadcastConstants.REFRESH_SMALL_VIEW,
+            CustomBroadcastConstants.CONF_STATE_UPDATE
+    };
 
 
     public ConfViewFragment() {
@@ -64,26 +65,49 @@ public class ConfViewFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    protected View inflateContentView(LayoutInflater inflater, ViewGroup container) {
+        //设置强制更新
+        setForceLoad(true);
+
         return inflater.inflate(R.layout.fragment_conf_view, container, false);
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        LocBroadcast.getInstance().registerBroadcast(receiver, broadcastNames);
-
+    protected void findViews(View view) {
         fsdContent = view.findViewById(R.id.fsd_content);
 
         fsdContent.setUnitWidthNum(4);
         fsdContent.setUnitHeightNum(4);
+    }
+
+    @Override
+    protected void initData() {
+        //设置强制刷新
+        LocBroadcast.getInstance().registerBroadcast(receiver, broadcastNames);
 
         //设置详情界面
         setDetailViews();
     }
 
+    /**
+     * 用户不可见
+     */
+    @Override
+    protected void onInvisible() {
+        super.onInvisible();
+
+        if (null != fsdContent) {
+            fsdContent.removeAllViews();
+        }
+    }
+
+    @Override
+    protected void addListeners() {
+    }
+
+    /**
+     * 设置详情界面
+     */
     private void setDetailViews() {
         if (getActivity() != null) {
             getActivity().runOnUiThread(new Runnable() {
@@ -91,8 +115,9 @@ public class ConfViewFragment extends Fragment {
                 public void run() {
                     detailViews.clear();
                     fsdContent.removeAllViews();
-
                     int watchCount = MeetingMgr.getInstance().getCurrentWatchSmallCount() + 1;
+
+                    ToastHelper.showShort("观看的会场数量-->" + watchCount);
 
                     switch (watchCount) {
                         case 1:
@@ -115,12 +140,10 @@ public class ConfViewFragment extends Fragment {
                             detailViews.add(new DetailView(new Point(2, 0), 2, 2, createView(getRemoteSmallVideoView_01())));
                             detailViews.add(new DetailView(new Point(0, 2), 2, 2, createView(getRemoteSmallVideoView_02())));
                             detailViews.add(new DetailView(new Point(2, 2), 2, 2, createView(getRemoteSmallVideoView_03())));
-
                             break;
                     }
 
                     fsdContent.setList(detailViews);
-
                     LogUtil.e(TAG, "设置四个画面");
                 }
             });
@@ -134,15 +157,27 @@ public class ConfViewFragment extends Fragment {
                 public void run() {
                     detailViews.clear();
 
-
                     fsdContent.setList(detailViews);
                 }
             });
         }
     }
 
+    /**
+     * 获取本地画面
+     *
+     * @return
+     */
     public SurfaceView getLocalVideoView() {
-        return VideoMgr.getInstance().getLocalVideoView();
+        SurfaceView localVideoView = VideoMgr.getInstance().getLocalVideoView();
+
+        localVideoView.getHolder().setFixedSize(DensityUtil.getScreenWidth(getContext()) / 2, DensityUtil.getScreenHeight(getContext()) / 2);
+
+        ViewGroup.LayoutParams layoutParams = localVideoView.getLayoutParams();
+        layoutParams.width = DensityUtil.getScreenWidth(getContext()) / 2;
+        layoutParams.height = DensityUtil.getScreenHeight(getContext()) / 2;
+        localVideoView.setLayoutParams(layoutParams);
+        return localVideoView;
     }
 
     public SurfaceView getRemoteSmallVideoView_01() {
@@ -165,11 +200,21 @@ public class ConfViewFragment extends Fragment {
 
     private ViewGroup createView(SurfaceView surfaceView) {
         ViewGroup viewGroup = (ViewGroup) View.inflate(getContext(), R.layout.item_conf_view, null);
+        ViewGroup.LayoutParams layoutParams = viewGroup.getLayoutParams();
+
+        if (null != layoutParams) {
+            layoutParams.width = DensityUtil.getScreenWidth(getContext()) / 2;
+            layoutParams.height = DensityUtil.getScreenHeight(getContext()) / 2;
+            viewGroup.setLayoutParams(layoutParams);
+        }
+
         addSurfaceView(viewGroup, surfaceView);
         return viewGroup;
     }
 
     private void addSurfaceView(ViewGroup container, SurfaceView child) {
+        container.removeAllViews();
+
         if (child == null) {
             return;
         }
@@ -184,42 +229,22 @@ public class ConfViewFragment extends Fragment {
         container.removeAllViews();
     }
 
-
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-//        if (context instanceof OnFragmentInteractionListener) {
-//            mListener = (OnFragmentInteractionListener) context;
-//        } else {
-//            throw new RuntimeException(context.toString()
-//                    + " must implement OnFragmentInteractionListener");
-//        }
-    }
-
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if (getUserVisibleHint()) {
-            setDetailViews();
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
     @Override
     public void onDestroy() {
         super.onDestroy();
 
+        fsdContent.removeAllViews();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        LocBroadcast.getInstance().unRegisterBroadcast(receiver, broadcastNames);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
         LocBroadcast.getInstance().unRegisterBroadcast(receiver, broadcastNames);
     }
 
@@ -228,12 +253,17 @@ public class ConfViewFragment extends Fragment {
         public void onReceive(String broadcastName, Object obj) {
             switch (broadcastName) {
                 case CustomBroadcastConstants.REFRESH_SMALL_VIEW:
+//                    setDetailViews();
+                    break;
+
+                case CustomBroadcastConstants.CONF_STATE_UPDATE:
+//                    ToastHelper.showShort("下标是:" + index);
+                    LogUtil.d(TAG, "当前的下标是:" + index);
                     setDetailViews();
                     break;
             }
         }
     };
-
 
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name

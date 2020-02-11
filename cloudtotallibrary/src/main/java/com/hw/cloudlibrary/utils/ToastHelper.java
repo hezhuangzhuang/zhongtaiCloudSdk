@@ -25,7 +25,6 @@ public class ToastHelper {
     public static void showShort(CharSequence message) {
         if (isShow) {
             Toast.makeText(LocContext.getContext(), message, Toast.LENGTH_SHORT).show();
-
         }
     }
 

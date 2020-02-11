@@ -100,7 +100,7 @@ public class VideoConfActivity extends BaseLibActivity implements View.OnClickLi
             CustomBroadcastConstants.GET_CONF_END,
             CustomBroadcastConstants.SCREEN_SHARE_STATE,
             //网络情况--CustomBroadcastConstants.STATISTIC_LOCAL_QOS
-            //CustomBroadcastConstants.STATISTIC_LOCAL_QOS,
+//            CustomBroadcastConstants.STATISTIC_LOCAL_QOS,
             CustomBroadcastConstants.GET_SVC_WATCH_INFO,
             CustomBroadcastConstants.RESUME_JOIN_CONF_RESULT,
             CustomBroadcastConstants.RESUME_JOIN_CONF_IND,

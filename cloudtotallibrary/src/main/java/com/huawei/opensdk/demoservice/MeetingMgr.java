@@ -991,7 +991,7 @@ public class MeetingMgr implements IMeetingMgr {
             return -1;
         }
 
-        //int result =  currentConference.postpone(time);
+//        int result =  currentConference.postpone(time);
 
         //TODO
         return 0;
@@ -1248,7 +1248,6 @@ public class MeetingMgr implements IMeetingMgr {
         return result;
     }
 
-
     public int watchAttendee(int watchPage) {
         if (null == currentConference) {
             LogUtil.e(TAG, "watch attendee failed, currentConference is null ");
@@ -1269,7 +1268,6 @@ public class MeetingMgr implements IMeetingMgr {
                 LogUtil.e(TAG, "watchAttendee is return true.");
             }
         }
-
         return 0;
     }
 

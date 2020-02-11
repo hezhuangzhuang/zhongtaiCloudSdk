@@ -412,7 +412,6 @@ public class VideoActivity extends BaseLibActivity implements View.OnClickListen
         }
     }
 
-
     public void videoDestroy() {
         if (null != CallMgr.getInstance().getVideoDevice()) {
             LogUtil.i(UIConstants.DEMO_TAG, "onCallClosed destroy.");
